@@ -25,6 +25,8 @@
       - [Simplex Methode: Example](#simplex-methode-example)
       - [Simplex Methode: Tableau](#simplex-methode-tableau)
       - [Simplex Methode: non-standard From LPs](#simplex-methode-non-standard-from-lps)
+  - [Modeling biochemical reactions](#modeling-biochemical-reactions)
+    - [Stochiometric matrix](#stochiometric-matrix)
 
 
 ## Matrix Properties
@@ -737,3 +739,129 @@ $$𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
 |    3    |       𝑥1       | 0 | 13/7 | 0 | 1 | 3/7 | -3/7 | -3/7 | 5/7 | 16/7 |
 
 보다시피 위의 maximization과 답은 같습니다.
+
+## Modeling biochemical reactions
+
+생화학 반응은 물리학과 화학의 법칙에 따라 진행됩니다.
+물질은 아무 곳에서나 창출될 수 없으며, 물질은 사라지지 않습니다. 따라서 기질과 생성물이 균형을 이루어야 합니다.
+
+일반적인 형태로, 주어진 집합 𝑈의 분자를 사용하는 생화학 반응은 다음과 같이 작성할 수 있습니다:
+
+$$\alpha_1 S_1 + \alpha_2 S_2 + \cdots + \alpha_n S_n \rightarrow \beta_1 S_1 + \beta_2 S_2 + \cdots + \beta_n S_n$$
+
+여기서:
+- $\alpha_i$ 는 $S_i$ 분자의 수를 Substrate로 나타냅니다.
+- $\beta_i$ 는 $S_i$ 분자의 수를 Product로 나타냅니다.
+
+생화학 반응에서 𝑆𝑖 분자의 수가 변하는 정도는 다음과 같이 나타낼 수 있습니다:
+
+$$\Delta_i = \beta_i - \alpha_i$$
+
+따라서 다음과 같이 설명할 수 있습니다:
+- 만약 $\beta_i - \alpha_i < 0$이면, $\Delta_i$ 만큼의 $S_i$ 분자가 consumed됩니다.
+- 만약 $\beta_i - \alpha_i > 0$이면, $\Delta_i$ 만큼의 $S_i$ 분자가 produced됩니다.
+- 만약 $\beta_i - \alpha_i = 0$이면, 반응은 $S_i$ 분자의 수를 변경하지 않습니다.
+
+따라서 생화학 반응에서 각 분자수의 변화량 $\Delta_i$들을 벡터로 표현할 수 있습니다. 이 벡터는 모든 분자에 대한 변화량을 포함하고 있습니다.  
+
+$$
+r = \begin{bmatrix} \beta_1 - \alpha_1 \\ 
+\beta_2 - \alpha_2 \\ 
+\vdots \\ 
+\beta_{n-1}-\alpha_{n-1} \\
+\beta_n - \alpha_n \end{bmatrix}
+$$
+
+한 반응의 예를 들어보자.
+
+$$𝐹𝐵𝑃 + 𝐻_2𝑂 → 𝐹6𝑃 + 𝑃𝑂_4^{3-} + 3𝐻^+$$
+
+$U=\{𝐹𝐵𝑃, 𝐻_2𝑂, 𝑃𝑂_4^{3-}, 𝐹6𝑃, 3𝐻^+\}$ 이 반응의 reaction vector는 
+
+$$r=
+\begin{bmatrix}
+-1 \\ 
+-1 \\ 
+1 \\ 
+1 \\ 
+3
+\end{bmatrix}
+$$
+
+>_**NOTE**_: row의 순서는 metabolites의 ordering과 같다.
+
+생화학 네트워크는 분자 집합 𝑈 상에서의 𝑚개의 생화학 반응을 모은 것입니다.
+
+$$
+\begin{align*}
+&\alpha_{11}S_1 + \alpha_{21}S_2 + \cdots + \alpha_{n1}S_n \rightarrow \beta_{11}S_1 + \beta_{21}S_2 + \cdots + \beta_{n1}S_n \\
+&\alpha_{12}S_1 + \alpha_{22}S_2 + \cdots + \alpha_{n2}S_n \rightarrow \beta_{12}S_1 + \beta_{22}S_2 + \cdots + \beta_{n2}S_n \\
+&  \vdots \\
+&\alpha_{1m}S_1 + \alpha_{2m}S_2 + \cdots + \alpha_{nm}S_n \rightarrow \beta_{1m}S_1 + \beta_{2m}S_2 + \cdots + \beta_{nm}S_n
+\end{align*}
+$$
+
+Each with a respective reaction vector 𝑟₁, … , 𝑟ₘ.
+
+### Stochiometric matrix
+
+반응 벡터들인 𝑟₁, … , 𝑟ₘ을 모은 𝑛 × 𝑚 행렬을 Stochiometric matrix 행렬 𝑁이라고 합니다:
+
+$$
+\mathbf{N} = 
+\begin{bmatrix}
+\mathbf{r}_1 &|\mathbf{r}_2 &| \cdots & |\mathbf{r}_m \\
+\end{bmatrix}
+$$
+
+또는 equivalently하게, 
+
+$$
+\mathbf{N} = 
+\begin{bmatrix}
+\beta_{11} - \alpha_{11} & \beta_{12} - \alpha_{12} & \cdots & \alpha_{1m} & \beta_{1m} \\
+\vdots & &&\vdots  \\
+\beta_{n1} - \alpha_{n1} & \beta_{n2} - \alpha_{n2} & \cdots & \alpha_{nm} & \beta_{nm}\\
+\end{bmatrix}
+$$
+
+이 entries를 stoichiometric coefficients라고 합니다.
+
+
+Reactions는 두 그룹으로 나눌 수 있습니다:
+- Internal reactions
+- Boundary 혹은 exchange reactions
+
+**Boundary (exchange) reactions**는 다음 중 하나를 갖습니다:
+* 오직 non-positive stoichiometric coefficients만 있는 경우 (즉, zero와
+negative coefficients) - export 반응으로 알려져 있습니다
+* 오직 non-negative stoichiometric coefficients만 있는 경우 (즉, zero와
+positive coefficients) - import 반응으로 알려져 있습니다
+
+**Internal reactions**은 적어도 하나의 negative coefficient와 하나의 positive coefficient를 포함합니다 (즉, 적어도 하나의 반대 부호를 가진 coefficients 쌍이 하나 이상 있습니다) 이는 export되거나, import된 분자가 없는, 완전히 internal 분자들끼리 일어난 반응을 의미합니다. 
+
+예시 stoichiometric matrix를 살펴봅시다.
+
+$$r1:\phi \to A$$
+
+$$r2: B \to \phi$$
+
+$$r3: A \to B$$
+
+이 반응들은 sthochiometric matrix로 나타내질 수 있습니다.
+
+$$
+N = 
+\begin{bmatrix}
+1&0&-1 \\
+0&-1&1
+\end{bmatrix}
+$$
+
+아래 반응 또한 동일한 stochiometric matrix를 가집니다.
+
+$$r1: A \to 2A$$
+
+$$r2: 2B \to B$$
+
+$$r3: A \to B$$
