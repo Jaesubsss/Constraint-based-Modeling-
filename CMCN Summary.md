@@ -91,26 +91,31 @@ $$
 
 간단한 예를 통해 가우스 소거법을 설명해 보겠습니다. 다음과 같은 선형 시스템을 고려해 봅시다.
 
-$$ \begin{cases} 2x + 3y + z = 1 \\ 4x + 4y + 3z = 2 \\ 2x + 5y + 2z = 3 \end{cases} $$
+$$\begin{cases} 2x + 3y + z = 1 \\ 4x + 4y + 3z = 2 \\ 2x + 5y + 2z = 3 \end{cases}$$
 
 1. **행렬 형태로 표현**: 위의 선형 시스템을 행렬로 표현하면 다음과 같습니다.
-$$ \begin{bmatrix} 2 & 3 & 1 \\ 4 & 4 & 3 \\ 2 & 5 & 2 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix} $$
 
-2. **전진 소거**: 이제 행렬을 상삼각 행렬로 변환하는 과정을 시작합니다. 이를 위해 첫 번째 열에서 첫 번째 행의 원소를 기준으로 다른 행의 원소를 0으로 만듭니다. 이 과정을 반복하면 다음과 같은 상삼각 행렬을 얻습니다.
-$$ \begin{bmatrix} 2 & 3 & 1 \\ 0 & -2 & 1 \\ 0 & 2 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} $$
+$$\begin{bmatrix} 2 & 3 & 1 \\ 4 & 4 & 3 \\ 2 & 5 & 2 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}$$
 
-3. **후진 대입**: 이제 상삼각 행렬에서 역으로 변수의 값을 추적하고, 각 변수의 값을 계산하여 시스템의 해를 찾습니다.
+1. **전진 소거**: 이제 행렬을 상삼각 행렬로 변환하는 과정을 시작합니다. 이를 위해 첫 번째 열에서 첫 번째 행의 원소를 기준으로 다른 행의 원소를 0으로 만듭니다. 이 과정을 반복하면 다음과 같은 상삼각 행렬을 얻습니다.
+
+$$\begin{bmatrix} 2 & 3 & 1 \\ 0 & -2 & 1 \\ 0 & 2 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+
+1. **후진 대입**: 이제 상삼각 행렬에서 역으로 변수의 값을 추적하고, 각 변수의 값을 계산하여 시스템의 해를 찾습니다.
    
    먼저, z를 구합니다.
-   $$ 2z = 1 \implies z = \frac{1}{2} $$
+
+   $$2z = 1 \implies z = \frac{1}{2}$$
    
    그런 다음, y를 구합니다.
-   $$ -2y + \frac{1}{2} = -2 \implies y = \frac{5}{4} $$
+
+   $$-2y + \frac{1}{2} = -2 \implies y = \frac{5}{4}$$
    
    마지막으로, x를 구합니다.
-   $$ 2x + 3(\frac{5}{4}) + \frac{1}{2} = 1 \implies x = -\frac{3}{4} $$
 
-따라서, 이 선형 시스템의 해는 $$ x = -\frac{3}{4} $$, $$ y = \frac{5}{4} $$, $$ z = \frac{1}{2} $$ 입니다.
+   $$2x + 3(\frac{5}{4}) + \frac{1}{2} = 1 \implies x = -\frac{3}{4}$$
+
+따라서, 이 선형 시스템의 해는 $x = -\frac{3}{4}$, $y = \frac{5}{4}$, $z = \frac{1}{2}$입니다.
 
 이 과정을 통해 Row Echelon Form을 만들 수 있다.
 
@@ -174,6 +179,7 @@ $$N(A) = \{c | Ac=0\}$$
 * 벡터를 행렬 형태로 배열합니다.
 
 벡터 A가 다음과 같을 때, 
+
 $$A=
 \begin{bmatrix}
 0&1&2&0&3&-1\\
@@ -194,7 +200,7 @@ $$(x_1, -2x_3 - 3x_5 + x_6, x_3, -2x_5, x_5, x_6)$$
 
 자 이제 general solution을 행렬 형태로 표현하면 다음과 같다.
 
-$$ \mathbf{x} = \begin{bmatrix} x_1 \\ -2x_3 - 3x_5 + x_6 \\ x_3 \\ -2x_5 \\ x_5 \\ x_6 \end{bmatrix} $$
+$$\mathbf{x} = \begin{bmatrix} x_1 \\ -2x_3 - 3x_5 + x_6 \\ x_3 \\ -2x_5 \\ x_5 \\ x_6 \end{bmatrix} $$
 
 자 이제 x를 각각의 free variables에 대한 방정식 행렬로 나타낼 수 있다. 여기서 행렬의 row는 총 variables의 수 n이 되고, column은 총 free variables의 개수 f가 된다. 
 
@@ -232,17 +238,19 @@ homogeneous linear system의 solution이 unique한 경우는 언제인가?
 non-homogeneous linear system $Ax=b$의 해를 구하는 방법은 다음과 같습니다:
 
 - 기본 행 연산의 적용은 방정식의 해를 변경하지 않습니다; 이는 augmented matrix [𝐴|𝑏]에 적용됩니다.
-- $[A|b]= 
-\begin{bmatrix}
-a_{11} & ... & a_{1n}&|&b_1 \\
-... & & ... &|&...\\
-a_{m1} & ... & a_{mn}&|&b_m
-\end{bmatrix}$
+
+    $[A|b]= 
+    \begin{bmatrix}
+    a_{11} & ... & a_{1n}&|&b_1 \\
+    ... & & ... &|&...\\
+    a_{m1} & ... & a_{mn}&|&b_m
+    \end{bmatrix}$
+
 - 만약 augmented matrix의 시스템이 particular solution(특성 해) 𝑝를 가진다면, 다른 모든 해는 𝑝 + 𝑥 형태를 가집니다. 여기서 𝑥 ∈ 𝑁(𝐴)입니다.
 
 즉, $Ax=0$의 general solution $x_i$와 $Ax=b$의 particular solution $p$를 안다면, $Ax=b$의 general solution $w$는 다음과 같이 표현될 수 있습니다.
 
-$$ w= x_i + p$$
+$$w= x_i + p$$
 
 즉, general solution $w$를 알기 위해선 particular solution $p$를 먼저 알아야 합니다.
 
@@ -255,12 +263,14 @@ $$ w= x_i + p$$
 > $Ax = 0$이므로, $Ap=b$
 
 예를 들어, 
+
 $$[A|b]= 
 \begin{bmatrix}
 1 & 2 & 3&|&a \\
 4&5&6 &|&b\\
 7 & 8 &9&|&c
 \end{bmatrix}$$
+
 일 때,  이걸 reduced row echelon form(rref)으로 만들면, 
 
 $$rref[A|b]= 
@@ -285,7 +295,11 @@ $$rref[A|b]=
 
 $$\mathbf{x} =\begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix}=\begin{bmatrix} -1 + x_3 \\ 1 - 2x_3 \\ x_3 \end{bmatrix}= \begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix} + x_3 \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} $$
 
-여기서 위의 $w=x_i+p$형태가 나타납니다. $\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$는 particular solution $p$이고, $\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$는 $x_i$의 coefficient, 즉 general solution입니다. 
+여기서 위의 $w=x_i+p$형태가 나타납니다. 
+$\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$는 particular solution $p$
+이고, 
+$\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$
+는 $x_i$의 coefficient, 즉 general solution입니다. 
 
 ## Linear Programming
 
@@ -312,11 +326,11 @@ Standard Linear Programming(LP) 모델은 다음과 같은 표준 형식을 가�
 
 모델은 시그마 표기법을 사용하여 다음과 같이 작성될 수 있습니다:
 
-$$ \text{max } z = \sum_{i=1}^{n} c_i x_i $$
+$$\text{max } z = \sum_{i=1}^{n} c_i x_i $$
 
 subject to (s.t.) (= 다음 조건 하에)
 
-$$ \sum_{j=1}^{n} a_{ij} x_j \leq b_i $$
+$$\sum_{j=1}^{n} a_{ij} x_j \leq b_i $$
 
 for $1 \leq i \leq m$
 
@@ -478,13 +492,20 @@ Simplex methode로 문제를 해결해 봅시다.
   
 따라서, 업데이트된 Objective function과 Constraints는:
 
-$$ z - 13x_1 - 11x_2 = 0 $$
-$$ 4x_1 + 5x_2 + s_1 = 1500 $$
-$$ 5x_1 + 3x_2 + s_2 = 1575 $$
-$$ x_1 + 2x_2 + s_3 = 420 $$
-$$ x_1 \geq 0 $$
-$$ x_2 \geq 0 $$
-$$ s_1, s_2, s_3 \geq 0 $$
+$$z - 13x_1 - 11x_2 = 0 $$
+
+$$4x_1 + 5x_2 + s_1 = 1500 $$
+
+$$5x_1 + 3x_2 + s_2 = 1575 $$
+
+$$x_1 + 2x_2 + s_3 = 420 $$
+
+$$x_1 \geq 0 $$
+
+$$x_2 \geq 0 $$
+
+$$s_1, s_2, s_3 \geq 0 $$
+
 
 한 가지 실행 가능한 해는 다음과 같습니다:
   - $x_1 = 0, x_2 = 0, s_1 = 1500, s_2 = 1575, s_3 = 420, z = 0$
@@ -510,15 +531,21 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
    - 제약 조건인 𝑥1 + 2𝑥2 + 𝑠3 = 420에서, 만약 **𝑥2 = 𝑠3 = 0**이라면, 𝑥1 = 420입니다. 이는 Product I를 420개 생산할 충분한 시간이 있다는 것을 의미합니다.
    - 따라서, 세 가지 제약을 모두 고려할 때, Product I를 생산하는 데 충분한 자원이 있습니다. 𝑥1의 최대값은 두 번째 제약에 의해 제한됩니다: 5𝑥1 + 3𝑥2 + 𝑠2 = 1575.
 
-- Step 2: 
+- **Step 2**
 
     $𝑥_1$을 제한하는 방정식에서
-    $$ 𝑥_1 = -\frac{3}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 315 $$
+
+    $$𝑥_1 = -\frac{3}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 315 $$
+
     다른 방정식에 대입하여 다음을 얻습니다:
-    $$ 𝑧 - \frac{16}{5}𝑥_2 + \frac{13}{5}𝑠_2 = 4095 $$
-    $$ \frac{13}{5}𝑥_2 + 𝑠_1 - \frac{4}{5}𝑠_2 = 240 $$
-    $$ 𝑥_1 + \frac{3}{5}𝑥_2 + \frac{1}{5}𝑠_2 = 315 $$
-    $$ \frac{7}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 𝑠_3 = 105 $$
+
+    $$𝑧 - \frac{16}{5}𝑥_2 + \frac{13}{5}𝑠_2 = 4095 $$
+
+    $$\frac{13}{5}𝑥_2 + 𝑠_1 - \frac{4}{5}𝑠_2 = 240 $$
+
+    $$𝑥_1 + \frac{3}{5}𝑥_2 + \frac{1}{5}𝑠_2 = 315 $$
+
+    $$\frac{7}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 𝑠_3 = 105 $$
 
     새로운 feasible solution은
     $𝑥_1 = 315$, $𝑥_2 = 0$, $𝑠_1 = 240$, $𝑠_2 = 0$, $𝑠_3 = 105$, $𝑧 = 4095$입니다.
@@ -530,19 +557,19 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
 
     동일한 분석 절차를 Step 1에서 사용한대로 따라가보면,
 
-    $$\frac{13}{5}𝑥_2 + 𝑠_1 - \frac{4}{5}𝑠_2 = 240$$ 
+    $$\frac{13}{5}𝑥_2 + 𝑠_1 - \frac{4}{5}𝑠_2 = 240$$
     에서, 만약 $𝑠_1 = 𝑠_2 = 0$이라면, $𝑥_2 = 92.3$ 입니다.
 
-    $$𝑥_1 + \frac{3}{5}𝑥_2 + \frac{1}{5}𝑠_2 = 315$$ 
+    $$𝑥_1 + \frac{3}{5}𝑥_2 + \frac{1}{5}𝑠_2 = 315$$
     에서, 만약 $𝑥_1 = 𝑠_2 = 0$이라면, $𝑥_2 = 525$ 입니다.
 
-    $$\frac{7}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 𝑠_3 = 105$$ 
+    $$\frac{7}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 𝑠_3 = 105$$
     에서, 만약 $𝑠_2 = 𝑠_3 = 0$이라면, $𝑥_2 = 75$ 입니다.
 
     따라서, 마지막 제약조건은 $𝑥_2$의 최대값을 75로 제한합니다.
     따라서, 새로운 feasible solution에는 $𝑥_2 = 75$, $𝑠_2 = 𝑠_3 = 0$이 포함됩니다.
 
-- Step 3:
+- **Step 3**
 
     방정식이 $𝑥_2$를 제한하는 것에서,
     $$𝑥_2 = \frac{1}{7}𝑠_2 - \frac{5}{7}𝑠_3 + 75$$
@@ -649,17 +676,17 @@ $$𝑥_1, 𝑥_2, 𝑥_3, 𝑠_1, 𝑠_2 ≥ 0$$
 
 주어진 문제에서 초기 해를 얻기 위해서는 모든 decision variable(𝑥1, 𝑥2, 𝑥3)를 모두 0으로 설정할 수 없습니다. 초기 솔루션을 얻기 위해 artificial variable이 크거나 같은 제약 조건에 추가될 수 있습니다. 𝑤1 및 𝑤2를 artificial variable로 정의해 봅시다.
 
-$$ 4𝑥_1 + 5𝑥_2 + 𝑥_3 - 𝑠_1 + 𝑤_1 = 13 $$
+$$4𝑥_1 + 5𝑥_2 + 𝑥_3 - 𝑠_1 + 𝑤_1 = 13 $$
 
-$$ 5𝑥_1 + 3𝑥_2 + 2𝑥_3 - 𝑠_2 + 𝑤_2 = 11 $$
+$$5𝑥_1 + 3𝑥_2 + 2𝑥_3 - 𝑠_2 + 𝑤_2 = 11 $$
 
 초기적으로 실현 가능한 솔루션은 다음과 같습니다:
 
-$$ 𝑥_1 = 𝑥_2 = 𝑥_3 = 𝑠_1 = 𝑠_2 = 0, 𝑤_1 = 13, 𝑤_2 = 11 $$
+$$𝑥_1 = 𝑥_2 = 𝑥_3 = 𝑠_1 = 𝑠_2 = 0, 𝑤_1 = 13, 𝑤_2 = 11 $$
 
 목적 함수는 다음과 같이 변환됩니다:
 
-$$ 𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
+$$𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
 
 𝑤1 = 𝑤2 = 0인 솔루션은 실현 가능하지만, 𝑤1 > 0, 𝑤2 > 0인 솔루션은 그렇지 않습니다. 따라서 이러한 값들을 0으로 추동시키기 위해 대규모 상수 𝑀을 목적 함수에 도입할 수 있습니다. 이는 big-M Methode으로 알려져 있습니다.
 
