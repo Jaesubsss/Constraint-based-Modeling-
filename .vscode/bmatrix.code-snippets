@@ -1,0 +1,13 @@
+{
+	"bmatrix": {
+		"prefix": "bmat",
+		"body": [
+			"$$",
+		  "\\begin{bmatrix}",
+		  "",
+		  "\\end{bmatrix}",
+		  "$$"
+		],
+		"description": "bmatrix"
+	  }
+}
