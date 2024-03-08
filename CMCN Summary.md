@@ -97,15 +97,38 @@ $$
 
 간단한 예를 통해 가우스 소거법을 설명해 보겠습니다. 다음과 같은 선형 시스템을 고려해 봅시다.
 
-$$\begin{cases} 2x + 3y + z = 1 \\ 4x + 4y + 3z = 2 \\ 2x + 5y + 2z = 3 \end{cases}$$
+$$
+\begin{cases} 
+2x + 3y + z = 1 \\ 
+4x + 4y + 3z = 2 \\ 
+2x + 5y + 2z = 3 
+\end{cases}
+$$
 
 1. **행렬 형태로 표현**: 위의 선형 시스템을 행렬로 표현하면 다음과 같습니다.
 
-$$\begin{bmatrix} 2 & 3 & 1 \\ 4 & 4 & 3 \\ 2 & 5 & 2 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}$$
+$$
+\begin{bmatrix} 
+2 & 3 & 1 \\ 
+4 & 4 & 3 \\ 
+2 & 5 & 2 \end{bmatrix} 
+\begin{bmatrix} x \\
+y \\ 
+z \end{bmatrix} = \begin{bmatrix} 1 \\ 
+2 \\ 
+3 \end{bmatrix}$$
 
 1. **전진 소거**: 이제 행렬을 상삼각 행렬로 변환하는 과정을 시작합니다. 이를 위해 첫 번째 열에서 첫 번째 행의 원소를 기준으로 다른 행의 원소를 0으로 만듭니다. 이 과정을 반복하면 다음과 같은 상삼각 행렬을 얻습니다.
 
-$$\begin{bmatrix} 2 & 3 & 1 \\ 0 & -2 & 1 \\ 0 & 2 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+$$\begin{bmatrix} 2 & 3 & 1 \\ 
+0 & -2 & 1 \\ 
+0 & 2 & 0 \end{bmatrix} \begin{bmatrix} 
+x \\ 
+y \\ 
+z \end{bmatrix} = \begin{bmatrix} 
+1 \\ 
+-2 \\ 
+1 \end{bmatrix}$$
 
 1. **후진 대입**: 이제 상삼각 행렬에서 역으로 변수의 값을 추적하고, 각 변수의 값을 계산하여 시스템의 해를 찾습니다.
    
