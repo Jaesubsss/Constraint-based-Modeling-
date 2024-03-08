@@ -45,7 +45,8 @@ $$
 
 $$b=
 \begin{bmatrix}
-b_1\\...\\
+b_1\\
+...\\
 b_n
 \end{bmatrix}
 $$
