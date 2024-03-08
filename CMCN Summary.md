@@ -33,20 +33,22 @@
 
 Matrix multiplication을 살펴보자.
 
-$A= 
+$$A= 
 \begin{bmatrix}
 a_{11} & ... & a_{1n} \\
 ... & & ... \\
 a_{m1} & ... & a_{mn}
 \end{bmatrix}
-$ 
+$$
+
 이고, 
-$b=
+$$b=
 \begin{bmatrix}
 b_1\\...\\
 b_n
 \end{bmatrix}
-$
+$$
+
 일때, 다음과 같이 나타낼 수 있다.
 
 $$
@@ -61,12 +63,14 @@ $$
 $(m \times n) \times (n \times 1) = (m \times 1)$이고, 즉, 매트랙스 x 벡터는 벡터이다. 
 
 만약 B가 row vector인 
-$B=
+
+$$B=
 \begin{bmatrix}
 b_1 & b_2&...& b_p
 \end{bmatrix}
-$
-라면? 
+$$
+
+이 형태 라면? 
 
 $$AB=
 \begin{bmatrix}
@@ -239,12 +243,12 @@ non-homogeneous linear system $Ax=b$의 해를 구하는 방법은 다음과 같
 
 - 기본 행 연산의 적용은 방정식의 해를 변경하지 않습니다; 이는 augmented matrix [𝐴|𝑏]에 적용됩니다.
 
-    $[A|b]= 
-    \begin{bmatrix}
-    a_{11} & ... & a_{1n}&|&b_1 \\
-    ... & & ... &|&...\\
-    a_{m1} & ... & a_{mn}&|&b_m
-    \end{bmatrix}$
+$$[A|b]= 
+\begin{bmatrix}
+a_{11} & ... & a_{1n}&|&b_1 \\
+... & & ... &|&...\\
+a_{m1} & ... & a_{mn}&|&b_m
+\end{bmatrix}$$
 
 - 만약 augmented matrix의 시스템이 particular solution(특성 해) 𝑝를 가진다면, 다른 모든 해는 𝑝 + 𝑥 형태를 가집니다. 여기서 𝑥 ∈ 𝑁(𝐴)입니다.
 
@@ -296,9 +300,13 @@ $$rref[A|b]=
 $$\mathbf{x} =\begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix}=\begin{bmatrix} -1 + x_3 \\ 1 - 2x_3 \\ x_3 \end{bmatrix}= \begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix} + x_3 \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} $$
 
 여기서 위의 $w=x_i+p$형태가 나타납니다. 
-$\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$는 particular solution $p$
-이고, 
-$\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$
+
+$$\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$$
+
+는 particular solution $p$이고, 
+
+$$\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+
 는 $x_i$의 coefficient, 즉 general solution입니다. 
 
 ## Linear Programming
@@ -412,26 +420,20 @@ Flow Capacity Problem는 다음과 같은 상황을 모델링하는데 사용됩
 The LP model for this example is then:
 
 Maximize:
-$$
-z = 13x_1 + 11x_2
-$$
+
+$$z = 13x_1 + 11x_2$$
 
 Subject to:
-$$
-4x_1 + 5x_2 \leq 1500
-$$
-$$
-5x_1 + 3x_2 \leq 1575
-$$
-$$
-x_1 + 2x_2 \leq 420
-$$
-$$
-x_1 \geq 0
-$$
-$$
-x_2 \geq 0
-$$
+
+$$4x_1 + 5x_2 \leq 1500$$
+
+$$5x_1 + 3x_2 \leq 1575$$
+
+$$x_1 + 2x_2 \leq 420$$
+
+$$x_1 \geq 0$$
+
+$$x_2 \geq 0$$
 
 주어진 부등식 $4x_1 + 5x_2 \leq 1500$은 평면상의 두 축 $x_1$과 $x_2$에 대한 선의 한쪽을 정의합니다. 이 부등식은 평면상에서 점 $x_1$과 $x_2$의 조합 중에서 1500보다 작거나 같은 값을 갖는 모든 점들을 포함하는 영역을 정의합니다. 따라서 이 부등식은 직선 $4x_1 + 5x_2 = 1500$의 아래쪽 영역을 나타냅니다.
 
