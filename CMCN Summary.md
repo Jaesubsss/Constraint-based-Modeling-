@@ -27,6 +27,13 @@
       - [Simplex Methode: non-standard From LPs](#simplex-methode-non-standard-from-lps)
   - [Modeling biochemical reactions](#modeling-biochemical-reactions)
     - [Stochiometric matrix](#stochiometric-matrix)
+  - [Metabolic Networks](#metabolic-networks)
+    - [Reaction Rate](#reaction-rate)
+    - [Steady State](#steady-state)
+  - [Flux Balance Analysis - FBA](#flux-balance-analysis---fba)
+    - [Metabolic Network Reconstruction](#metabolic-network-reconstruction)
+      - [Defining the biomass reaction](#defining-the-biomass-reaction)
+      - [(Non-) Growth associated maintenance](#non--growth-associated-maintenance)
 
 
 ## Matrix Properties
@@ -865,3 +872,282 @@ $$r1: A \to 2A$$
 $$r2: 2B \to B$$
 
 $$r3: A \to B$$
+
+## Metabolic Networks
+
+Metabolic Networks는 생화학 반응들의 집합을 나타내며 이를 통해 일련의 대사물질들이 서로 transformed되고 environment와 exchange(즉, import 및 export)됩니다.
+
+Metabolic Networks는 다음과 같이 stoichiometric matrix에 의해 표현됩니다:
+
+- Row는 Metabolites를 나타냅니다.
+- Column은 Reactions를 나타냅니다.
+- Entries는 Stoichiometric coefficients입니다:
+  - Negative coefficients는 Substrate을 나타냅니다.
+  - Positive coefficients는 Product를 나타냅니다.
+
+아래는 example stoichiometric matrix입니다.
+
+![](./metanet.PNG)
+
+### Reaction Rate 
+
+Reaction Rate 또는 Reaction Flux, $v_j$는 반응 $r_j$의 conversion rate, 즉 반응물에서 생성물로의 Throughput을 의미합니다.
+
+Reaction rate는 physical quantitiy(물리량)이므로, 관련 유닛을 가집니다. constraint-based modeling에서 Flux는 다음과 같이 표현됩니다.
+
+$$v=\frac{mol}{gDW\cdot h}$$
+
+Flux가 물질의 농도와 시간에 매치한다는 것을 볼 수 있습니다.  
+
+Reaction Rate는 Metabolite concentration과도 연관이 있습니다. 
+
+Metabolite 𝑋𝑖의 농도는 시간이 지남에 따라 바뀝니다.
+
+- 𝑋𝑖를 생성하거나 합성하는 반응
+- 𝑋𝑖를 소비하거나 분해하는 반응
+
+Metabolite 𝑋𝑖의 농도의 시간적 변화 정도는 해당 반응의 반응 속도와 𝑋𝑖가 반응에 들어가는 몰 농도의 곱과 같습니다.
+
+- 𝑋𝑖를 **produce**하는 반응은 그 농도의 증가에 **positive**하게 기여합니다.
+- 𝑋𝑖를 **consume**하는 반응은 그 농도의 감소에 **negative**하게 기여합니다.
+
+$\Delta t$를 일정 작은 시간 간격이라고 가정했을 때, 시간 $t$에서 $t+\Delta t$까지 Metabolite $X_i$의 농도 변화는 다음과 같습니다.
+
+$$x_i(t+\Delta t)-x_i(t)$$
+
+농도의 변화율(rate of change in concentration)은 다음과 같습니다:
+
+$$\frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}$$
+
+이는 다음과 같이 표현할 수도 있습니다.
+
+>             $X_i$ 생성 반응 constribution - $X_i$ 소비 반응 constribution
+
+Stoichiometric matrix $N$의 i번째 행 $N_i$은 metabolite $X_i$를 정의합니다.
+
+따라서 $v$가 모든 vectors의 Reaction rates라면, 다음과 같습니다:
+
+$$\frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}=N_{i}\cdot v(t)$$
+
+이를 $\Delta t \to 0$에 대해 극한값을 취하면: _중요하지 않음_
+
+$$\lim_{\Delta t \to 0} \frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}= \lim_{\Delta t \to 0}N_{i}\cdot v(t)$$
+
+$$\frac{dx_i}{dt}=N_{i}\cdot v(t)$$
+
+여기서 $v(t)$는 일반적으로 다음과 같은 형태를 가집니다:
+
+$$ v(t)=
+\begin{bmatrix}
+v_1(t) \\
+v_2(t) \\
+\vdots \\
+v_i(t)
+\end{bmatrix}
+$$
+
+각 row는 각 Metabolite $X_i$에 대한 Reaction rate입니다.
+
+그렇다면 Metabolite $X_i$의 농도변화율은 다음과 같습니다:
+
+- $N_{m \times n}$이고, i가 row, j가 column을 가리킬 때, 
+
+$$\frac{dx_i}{dt}=v_1(t)+\dots+v_i(t)$$
+
+따라서, 
+
+$$
+\begin{bmatrix}
+\frac{dx_1}{dt} \\
+\vdots\\
+\frac{dx_i}{dt}
+\end{bmatrix}
+=N_{i}\cdot v(t)
+$$
+
+$N_{i}\cdot v(t)$에 대한 간단한 예시를 들어보도록 하겠습니다.
+
+> 
+> $$ N_{i}\cdot v(t)=
+> \begin{bmatrix}
+> 1&0&-1 \\
+> 0&-1&1
+> \end{bmatrix}
+> \begin{bmatrix} v_1 \\
+> v_2 \\ 
+> v_3 \end{bmatrix}$$
+> 
+> 따라서, 각 Metabolite A와 B의 Reaction rate는 다음과 같이 정의됩니다.
+> 
+> $$N_{A}\cdot v(t)=v_1 -v_3$$
+> 
+> $$N_{B}\cdot v(t)=v_3 -v_2$$
+> 
+> Reaction rate의 changing rate는 다음과 같습니다:
+> 
+> $$\frac{x_A(t+\Delta t)-x_A(t)}{\Delta t}$$
+> 
+> $$\frac{x_B(t+\Delta t)-x_B(t)}{\Delta t}$$
+
+Reaction rate는 다음과 같은 요소에 의해 결정됩니다:
+- metabolites의 농도, 𝑥
+- 반응을 촉매하는 효소의 농도, 𝐸
+- activator / inhibitor 의 농도
+- 효소의 촉매 속도인 catalytic rate, $𝑘_{𝑐𝑎𝑡}$
+
+즉, 반응 $r_j$에 대해서, 
+
+$$v_j=f_j(x,E,k)$$
+
+그러나, 실제 현실의 metabolic modeling에선, 우리는 여러 effectors와 kinetic paramters등 정확히 알지 못하는 것이 매우 매우 많습니다. 따라서 $v_j=f_j(x,E,k)$는 정확히 specified 될 수 없습니다. 
+
+이 우리가 모르는 많은 변수들을 계산에서 제외하고, 너무나 복잡하여 계산이 불가능한 모델링을 간단하게 만들기 위해서, steady state의 개념을 도입합니다.
+
+### Steady State
+
+Steady State는 모델을 간소화하고 분석을 용이하게 하기 위해 사용됩니다. steady state에서는 metabolic network 내 대부분의 변수들이 일정한 값을 유지하기 때문에, 모델링이 더 간단해집니다. 
+
+많은 생물학적 실험은 일정한 조건에서 수행되며, 이러한 조건에서 steady state에서의 모델을 사용하여 실험 결과를 설명하고 예측할 수 있습니다.
+
+또한, 생물의 항상성에 의해 대부분의 생물학적 시스템은 외부 환경 변화에도 불구하고 상대적으로 안정된 상태를 유지합니다. 따라서 steady state에서의 모델은 실제 상황을 잘 근사합니다.
+
+이런 steady state의 concept에서, 다음 조건들이 성립합니다.
+
+일정 기간 동안 환경이 변하지 않으면
+- 유전자 발현은 상대적으로 일정합니다.
+- 효소 수준은 변하지 않습니다.
+
+따라서 metabolites concentrate도 일정하게 유지됩니다.
+
+또한, metabolic pool에서 system 외부로 나가는 것은 들어오는 것과 같습니다. 
+
+이 조건 하에 system이 steady state에 있다고 가정됩니다.
+
+일반적으로, change in metabolism은 초 단위에서 발생하는 반면, 단백질 수준 및 유전자 발현의 변화는 분 단위 또는 시간 단위로 발생합니다. 이러한 시간적 차이는 대사 활동 및 단백질 수준 및 유전자 발현 간의 특성적인 차이 때문에 발생합니다.
+
+Thermodynamic equilibrium은 대사 과정에서의 하나의 안정상태 형태입니다. 이는 metabolic pool에 입-출이 없고 metabolic pool 내에서 물질의 농도가 일정하게 유지되는 상태를 의미합니다.
+
+따라서, 
+
+$$\frac{dx_i}{dt}=N_{i}\cdot f(t)=N_{i}\cdot v(t)=0$$
+
+이고, 다음과 같이 쓸 수 있습니다.
+
+$$Nv=0$$
+
+시스템이 일단 steady state에 있으면 농도에 변화가 없는 한 시스템에서 벗어나지 않기 때문에 시간에 대한 의존도는 낮아질 수 있습니다.
+
+**이제, Reaction rate를 variable로 하고, stoichiometric matrix에 해당하는 coefficients를 사용하여 linear system을 구축합니다.**
+
+이 **linear equation system의 해**는 metabolic network가 support 할 수 있는 **set of all steady states**에 해당합니다. 
+
+steady state의 가정 하에, 반응들의 농도변화 예를 살펴보도록 하겠습니다.
+
+![](./steady1.PNG)
+
+* $v_{ex}$는 export reaction을 의미합니다.
+* $v_2$는 reversible reaction입니다. $Nv=0$임을 알고, v가 뭔지는 모를 때에도, 우리는 어떤 반응이 irreversible이고 어떤 반응이 reversible인지는 알 수 있습니다. 
+* reversible reaction은 두개의 forward-/backward irreversible reaction으로 분리할 수 있습니다. 
+* 따라서, 위의 예시에서 5개의 Metabolites와 7개의 reactions, 즉 $N_{5 \times 7}$의 stoichiometric matrix를 생성할 수 있습니다. 
+
+따라서, 위의 예시에서 다음과 같은 식을 얻을 수 있습니다.
+
+![](./steady3.PNG)
+
+이는 결국 $Nv=0$의 형태입니다.
+
+그러나 일반적으로, 대사 네트워크에는 사용 가능한 물질보다 더 많은 반응이 포함되어 있습니다. 이는 본질적으로 불완전한 linear equation system을 유발하며, 무한대로 많은 solution이 있을 수 있습니다. 
+
+이러한 space of solutions를 좁히는 것과 biologically relevant solution을 식별하는 것이 우리의 목적입니다.
+
+
+## Flux Balance Analysis - FBA
+
+세포가 steady state에 도달하는 데 영향을 미치는 과정은 무엇일까요?
+- 효소 농도와 activity 조절
+- 효소 촉매 속도에 대한 evolutionary pressure
+
+Cellular metabolism은 적응을 극대화하기 위해 진화했다는 가정 하에, 풍부한 배지에서 성장 중인 미생물에게는 이는 성장을 극대화하는 것과 일치합니다.
+
+Metabolic reactions에서 성장으로의 규모를 어떻게 연결할 수 있을까요?
+
+Biomass composition은 다양한 검사를 통해 획득할 수 있습니다
+- DNA
+- RNA
+- 지질
+- 단백질
+- 아미노산
+- 탄수화물
+
+그런 다음 Growth는 이러한 precursors를 biomass으로 변환하는 합성 반응의 속도로 모델링될 수 있습니다.
+
+반응 속도는 일정한 하한값(lower bound)과 상한값(upper bound)을 따릅니다.
+
+$$v_{j,min} \leq v_j \leq v_{j,max}$$
+
+lower bound가 0으로 설정되면, 반응은 irreversible reaction, 즉 비가역적 반응으로 간주됩니다.
+
+$$0 \leq v_j \leq v_{j,max}$$
+
+그렇지 않으면, lower bound가 음수인 경우, 반응은 가역적입니다.
+
+$$a \leq v_j \leq b$$
+
+반응의 lower bound과 upper bound가 모두 0이면, 해당 반응은 플럭스를 운반하지 않으며, 차단된 상태로 간주됩니다. 이를 **blocked reaction**이라 합니다.
+
+Upper bound는 일반적으로 큰 수로 설정되거나 (예: 1000), 데이터로부터 결정될 수 있습니다. 예를 들어, 최대 반응 속도 (𝑉𝑚𝑎𝑥 = $𝑘_{𝑐𝑎𝑡}𝐸$)가 알려져 있는 경우입니다.
+
+측정된 nutrient uptake나 product excretion을 특정하고 모델에 통합할 수 있습니다.
+
+* Reaction boundaries
+* Optimization of biomass
+
+이 둘을 결합하여, linear programming 문제로 표현할 수 있습니다!
+
+> **growth as the optimum $z^*$**
+>$$z^*=\mathbf{max}\, \; c^Tv$$
+>s.t.
+>$$Nv=0$$
+>$$v_{min} \leq v_j \leq v_{max}$$
+>where
+>$$c_i =
+>\begin{cases} 
+> 1,\; i \; corresponds\; to \; r_{bio} \\ 
+> 0,\; otherwise 
+> \end{cases}
+> $$
+
+
+FBA는 주어진 nutirent에 대한 product의 이론적 최대량을 계산합니다. 
+
+growth뿐 아니라 다른 여러 objective functions를 도입할 수 있으며, 따라서 현대 metabolic engineering의 기본 근간이 됩니다.
+
+### Metabolic Network Reconstruction
+
+다음 과정을 거친다.
+
+![](./recons.PNG)
+
+FBA, 혹은 다른 Analysis Methode를 위해 필요한 Metabolic Network의 정보는 다음과 같습니다. 
+
+1. Full Name (**rxnNames**)
+2. Short name (**rxns**)
+3. Formula
+4. Gene-reaction association
+(**rules**)
+1. Genes (**genes**)
+2. Proteins (proteins)
+3. Cellular Systems (subSystems)
+4. Reaction direction (rev)
+5. Flux lower bound (**lb**)
+6.  Flux upper bound (**ub**)
+7.  EC Number (rxnECNumber)
+
+#### Defining the biomass reaction
+
+정리하기엔 너무 얕고 distributed된 내용이다. 강의 slides 보면서 공부하자. lecture 4 후반부이다.
+#### (Non-) Growth associated maintenance 
+
+same
+
+
