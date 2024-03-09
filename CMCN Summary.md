@@ -331,15 +331,27 @@ $$rref[A|b]=
 
 해를 행렬 형태로 나타내면 다음과 같습니다:
 
-$$\mathbf{x} =\begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix}=\begin{bmatrix} -1 + x_3 \\ 1 - 2x_3 \\ x_3 \end{bmatrix}= \begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix} + x_3 \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} $$
+$$\mathbf{x} =\begin{bmatrix} x_1 \\ 
+x_2 \\ 
+x_3 \end{bmatrix}=\begin{bmatrix} -1 + x_3 \\
+ 1 - 2x_3 \\
+ x_3 \end{bmatrix}= \begin{bmatrix} -1 \\
+ 1 \\
+ 0 \end{bmatrix} + x_3 \begin{bmatrix} 1 \\
+ -2 \\
+ 1 \end{bmatrix} $$
 
 여기서 위의 $w=x_i+p$형태가 나타납니다. 
 
-$$\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$$
+$$\begin{bmatrix} -1 \\ 
+1 \\ 
+0 \end{bmatrix}$$
 
 는 particular solution $p$이고, 
 
-$$\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+$$\begin{bmatrix} 1 \\
+ -2 \\ 
+ 1 \end{bmatrix}$$
 
 는 $x_i$의 coefficient, 즉 general solution입니다. 
 
