@@ -25,6 +25,15 @@
       - [Simplex Methode: Example](#simplex-methode-example)
       - [Simplex Methode: Tableau](#simplex-methode-tableau)
       - [Simplex Methode: non-standard From LPs](#simplex-methode-non-standard-from-lps)
+  - [Modeling biochemical reactions](#modeling-biochemical-reactions)
+    - [Stochiometric matrix](#stochiometric-matrix)
+  - [Metabolic Networks](#metabolic-networks)
+    - [Reaction Rate](#reaction-rate)
+    - [Steady State](#steady-state)
+  - [Flux Balance Analysis - FBA](#flux-balance-analysis---fba)
+    - [Metabolic Network Reconstruction](#metabolic-network-reconstruction)
+      - [Defining the biomass reaction](#defining-the-biomass-reaction)
+      - [(Non-) Growth associated maintenance](#non--growth-associated-maintenance)
 
 
 ## Matrix Properties
@@ -33,20 +42,24 @@
 
 Matrix multiplication을 살펴보자.
 
-$A= 
+$$A= 
 \begin{bmatrix}
 a_{11} & ... & a_{1n} \\
 ... & & ... \\
 a_{m1} & ... & a_{mn}
 \end{bmatrix}
-$ 
+$$
+
 이고, 
-$b=
+
+$$b=
 \begin{bmatrix}
-b_1\\...\\
+b_1\\
+...\\
 b_n
 \end{bmatrix}
-$
+$$
+
 일때, 다음과 같이 나타낼 수 있다.
 
 $$
@@ -61,12 +74,14 @@ $$
 $(m \times n) \times (n \times 1) = (m \times 1)$이고, 즉, 매트랙스 x 벡터는 벡터이다. 
 
 만약 B가 row vector인 
-$B=
+
+$$B=
 \begin{bmatrix}
 b_1 & b_2&...& b_p
 \end{bmatrix}
-$
-라면? 
+$$
+
+이 형태 라면? 
 
 $$AB=
 \begin{bmatrix}
@@ -91,23 +106,51 @@ $$
 
 간단한 예를 통해 가우스 소거법을 설명해 보겠습니다. 다음과 같은 선형 시스템을 고려해 봅시다.
 
-$$\begin{cases} 2x + 3y + z = 1 \\ 4x + 4y + 3z = 2 \\ 2x + 5y + 2z = 3 \end{cases}$$
+$$
+\begin{cases} 
+2x + 3y + z = 1 \\ 
+4x + 4y + 3z = 2 \\ 
+2x + 5y + 2z = 3 
+\end{cases}
+$$
 
 1. **행렬 형태로 표현**: 위의 선형 시스템을 행렬로 표현하면 다음과 같습니다.
-$$\begin{bmatrix} 2 & 3 & 1 \\ 4 & 4 & 3 \\ 2 & 5 & 2 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ 2 \\ 3 \end{bmatrix}$$
 
-2. **전진 소거**: 이제 행렬을 상삼각 행렬로 변환하는 과정을 시작합니다. 이를 위해 첫 번째 열에서 첫 번째 행의 원소를 기준으로 다른 행의 원소를 0으로 만듭니다. 이 과정을 반복하면 다음과 같은 상삼각 행렬을 얻습니다.
-$$\begin{bmatrix} 2 & 3 & 1 \\ 0 & -2 & 1 \\ 0 & 2 & 0 \end{bmatrix} \begin{bmatrix} x \\ y \\ z \end{bmatrix} = \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+$$
+\begin{bmatrix} 
+2 & 3 & 1 \\ 
+4 & 4 & 3 \\ 
+2 & 5 & 2 \end{bmatrix} 
+\begin{bmatrix} x \\
+y \\ 
+z \end{bmatrix} = \begin{bmatrix} 1 \\ 
+2 \\ 
+3 \end{bmatrix}$$
 
-3. **후진 대입**: 이제 상삼각 행렬에서 역으로 변수의 값을 추적하고, 각 변수의 값을 계산하여 시스템의 해를 찾습니다.
+1. **전진 소거**: 이제 행렬을 상삼각 행렬로 변환하는 과정을 시작합니다. 이를 위해 첫 번째 열에서 첫 번째 행의 원소를 기준으로 다른 행의 원소를 0으로 만듭니다. 이 과정을 반복하면 다음과 같은 상삼각 행렬을 얻습니다.
+
+$$\begin{bmatrix} 2 & 3 & 1 \\ 
+0 & -2 & 1 \\ 
+0 & 2 & 0 \end{bmatrix} \begin{bmatrix} 
+x \\ 
+y \\ 
+z \end{bmatrix} = \begin{bmatrix} 
+1 \\ 
+-2 \\ 
+1 \end{bmatrix}$$
+
+1. **후진 대입**: 이제 상삼각 행렬에서 역으로 변수의 값을 추적하고, 각 변수의 값을 계산하여 시스템의 해를 찾습니다.
    
    먼저, z를 구합니다.
+
    $$2z = 1 \implies z = \frac{1}{2}$$
    
    그런 다음, y를 구합니다.
+
    $$-2y + \frac{1}{2} = -2 \implies y = \frac{5}{4}$$
    
    마지막으로, x를 구합니다.
+
    $$2x + 3(\frac{5}{4}) + \frac{1}{2} = 1 \implies x = -\frac{3}{4}$$
 
 따라서, 이 선형 시스템의 해는 $x = -\frac{3}{4}$, $y = \frac{5}{4}$, $z = \frac{1}{2}$입니다.
@@ -174,6 +217,7 @@ $$N(A) = \{c | Ac=0\}$$
 * 벡터를 행렬 형태로 배열합니다.
 
 벡터 A가 다음과 같을 때, 
+
 $$A=
 \begin{bmatrix}
 0&1&2&0&3&-1\\
@@ -232,12 +276,14 @@ homogeneous linear system의 solution이 unique한 경우는 언제인가?
 non-homogeneous linear system $Ax=b$의 해를 구하는 방법은 다음과 같습니다:
 
 - 기본 행 연산의 적용은 방정식의 해를 변경하지 않습니다; 이는 augmented matrix [𝐴|𝑏]에 적용됩니다.
-- $[A|b]= 
+
+$$[A|b]= 
 \begin{bmatrix}
 a_{11} & ... & a_{1n}&|&b_1 \\
 ... & & ... &|&...\\
 a_{m1} & ... & a_{mn}&|&b_m
-\end{bmatrix}$
+\end{bmatrix}$$
+
 - 만약 augmented matrix의 시스템이 particular solution(특성 해) 𝑝를 가진다면, 다른 모든 해는 𝑝 + 𝑥 형태를 가집니다. 여기서 𝑥 ∈ 𝑁(𝐴)입니다.
 
 즉, $Ax=0$의 general solution $x_i$와 $Ax=b$의 particular solution $p$를 안다면, $Ax=b$의 general solution $w$는 다음과 같이 표현될 수 있습니다.
@@ -255,12 +301,14 @@ $$w= x_i + p$$
 > $Ax = 0$이므로, $Ap=b$
 
 예를 들어, 
+
 $$[A|b]= 
 \begin{bmatrix}
 1 & 2 & 3&|&a \\
 4&5&6 &|&b\\
 7 & 8 &9&|&c
 \end{bmatrix}$$
+
 일 때,  이걸 reduced row echelon form(rref)으로 만들면, 
 
 $$rref[A|b]= 
@@ -285,7 +333,15 @@ $$rref[A|b]=
 
 $$\mathbf{x} =\begin{bmatrix} x_1 \\ x_2 \\ x_3 \end{bmatrix}=\begin{bmatrix} -1 + x_3 \\ 1 - 2x_3 \\ x_3 \end{bmatrix}= \begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix} + x_3 \begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix} $$
 
-여기서 위의 $w=x_i+p$형태가 나타납니다. $\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$는 particular solution $p$이고, $\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$는 $x_i$의 coefficient, 즉 general solution입니다. 
+여기서 위의 $w=x_i+p$형태가 나타납니다. 
+
+$$\begin{bmatrix} -1 \\ 1 \\ 0 \end{bmatrix}$$
+
+는 particular solution $p$이고, 
+
+$$\begin{bmatrix} 1 \\ -2 \\ 1 \end{bmatrix}$$
+
+는 $x_i$의 coefficient, 즉 general solution입니다. 
 
 ## Linear Programming
 
@@ -398,26 +454,20 @@ Flow Capacity Problem는 다음과 같은 상황을 모델링하는데 사용됩
 The LP model for this example is then:
 
 Maximize:
-$$
-z = 13x_1 + 11x_2
-$$
+
+$$z = 13x_1 + 11x_2$$
 
 Subject to:
-$$
-4x_1 + 5x_2 \leq 1500
-$$
-$$
-5x_1 + 3x_2 \leq 1575
-$$
-$$
-x_1 + 2x_2 \leq 420
-$$
-$$
-x_1 \geq 0
-$$
-$$
-x_2 \geq 0
-$$
+
+$$4x_1 + 5x_2 \leq 1500$$
+
+$$5x_1 + 3x_2 \leq 1575$$
+
+$$x_1 + 2x_2 \leq 420$$
+
+$$x_1 \geq 0$$
+
+$$x_2 \geq 0$$
 
 주어진 부등식 $4x_1 + 5x_2 \leq 1500$은 평면상의 두 축 $x_1$과 $x_2$에 대한 선의 한쪽을 정의합니다. 이 부등식은 평면상에서 점 $x_1$과 $x_2$의 조합 중에서 1500보다 작거나 같은 값을 갖는 모든 점들을 포함하는 영역을 정의합니다. 따라서 이 부등식은 직선 $4x_1 + 5x_2 = 1500$의 아래쪽 영역을 나타냅니다.
 
@@ -479,12 +529,19 @@ Simplex methode로 문제를 해결해 봅시다.
 따라서, 업데이트된 Objective function과 Constraints는:
 
 $$z - 13x_1 - 11x_2 = 0 $$
+
 $$4x_1 + 5x_2 + s_1 = 1500 $$
+
 $$5x_1 + 3x_2 + s_2 = 1575 $$
+
 $$x_1 + 2x_2 + s_3 = 420 $$
+
 $$x_1 \geq 0 $$
+
 $$x_2 \geq 0 $$
+
 $$s_1, s_2, s_3 \geq 0 $$
+
 
 한 가지 실행 가능한 해는 다음과 같습니다:
   - $x_1 = 0, x_2 = 0, s_1 = 1500, s_2 = 1575, s_3 = 420, z = 0$
@@ -510,14 +567,20 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
    - 제약 조건인 𝑥1 + 2𝑥2 + 𝑠3 = 420에서, 만약 **𝑥2 = 𝑠3 = 0**이라면, 𝑥1 = 420입니다. 이는 Product I를 420개 생산할 충분한 시간이 있다는 것을 의미합니다.
    - 따라서, 세 가지 제약을 모두 고려할 때, Product I를 생산하는 데 충분한 자원이 있습니다. 𝑥1의 최대값은 두 번째 제약에 의해 제한됩니다: 5𝑥1 + 3𝑥2 + 𝑠2 = 1575.
 
-- Step 2: 
+- **Step 2**
 
     $𝑥_1$을 제한하는 방정식에서
+
     $$𝑥_1 = -\frac{3}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 315 $$
+
     다른 방정식에 대입하여 다음을 얻습니다:
+
     $$𝑧 - \frac{16}{5}𝑥_2 + \frac{13}{5}𝑠_2 = 4095 $$
+
     $$\frac{13}{5}𝑥_2 + 𝑠_1 - \frac{4}{5}𝑠_2 = 240 $$
+
     $$𝑥_1 + \frac{3}{5}𝑥_2 + \frac{1}{5}𝑠_2 = 315 $$
+
     $$\frac{7}{5}𝑥_2 - \frac{1}{5}𝑠_2 + 𝑠_3 = 105 $$
 
     새로운 feasible solution은
@@ -542,7 +605,7 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
     따라서, 마지막 제약조건은 $𝑥_2$의 최대값을 75로 제한합니다.
     따라서, 새로운 feasible solution에는 $𝑥_2 = 75$, $𝑠_2 = 𝑠_3 = 0$이 포함됩니다.
 
-- Step 3:
+- **Step 3**
 
     방정식이 $𝑥_2$를 제한하는 것에서,
     $$𝑥_2 = \frac{1}{7}𝑠_2 - \frac{5}{7}𝑠_3 + 75$$
@@ -683,3 +746,407 @@ $$𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
 |    3    |       𝑥1       | 0 | 13/7 | 0 | 1 | 3/7 | -3/7 | -3/7 | 5/7 | 16/7 |
 
 보다시피 위의 maximization과 답은 같습니다.
+
+## Modeling biochemical reactions
+
+생화학 반응은 물리학과 화학의 법칙에 따라 진행됩니다.
+물질은 아무 곳에서나 창출될 수 없으며, 물질은 사라지지 않습니다. 따라서 기질과 생성물이 균형을 이루어야 합니다.
+
+일반적인 형태로, 주어진 집합 𝑈의 분자를 사용하는 생화학 반응은 다음과 같이 작성할 수 있습니다:
+
+$$\alpha_1 S_1 + \alpha_2 S_2 + \cdots + \alpha_n S_n \rightarrow \beta_1 S_1 + \beta_2 S_2 + \cdots + \beta_n S_n$$
+
+여기서:
+- $\alpha_i$ 는 $S_i$ 분자의 수를 Substrate로 나타냅니다.
+- $\beta_i$ 는 $S_i$ 분자의 수를 Product로 나타냅니다.
+
+생화학 반응에서 𝑆𝑖 분자의 수가 변하는 정도는 다음과 같이 나타낼 수 있습니다:
+
+$$\Delta_i = \beta_i - \alpha_i$$
+
+따라서 다음과 같이 설명할 수 있습니다:
+- 만약 $\beta_i - \alpha_i < 0$이면, $\Delta_i$ 만큼의 $S_i$ 분자가 consumed됩니다.
+- 만약 $\beta_i - \alpha_i > 0$이면, $\Delta_i$ 만큼의 $S_i$ 분자가 produced됩니다.
+- 만약 $\beta_i - \alpha_i = 0$이면, 반응은 $S_i$ 분자의 수를 변경하지 않습니다.
+
+따라서 생화학 반응에서 각 분자수의 변화량 $\Delta_i$들을 벡터로 표현할 수 있습니다. 이 벡터는 모든 분자에 대한 변화량을 포함하고 있습니다.  
+
+$$
+r = \begin{bmatrix} \beta_1 - \alpha_1 \\ 
+\beta_2 - \alpha_2 \\ 
+\vdots \\ 
+\beta_{n-1}-\alpha_{n-1} \\
+\beta_n - \alpha_n \end{bmatrix}
+$$
+
+한 반응의 예를 들어보자.
+
+$$𝐹𝐵𝑃 + 𝐻_2𝑂 → 𝐹6𝑃 + 𝑃𝑂_4^{3-} + 3𝐻^+$$
+
+$U=\{𝐹𝐵𝑃, 𝐻_2𝑂, 𝑃𝑂_4^{3-}, 𝐹6𝑃, 3𝐻^+\}$ 이 반응의 reaction vector는 
+
+$$r=
+\begin{bmatrix}
+-1 \\ 
+-1 \\ 
+1 \\ 
+1 \\ 
+3
+\end{bmatrix}
+$$
+
+>_**NOTE**_: row의 순서는 metabolites의 ordering과 같다.
+
+생화학 네트워크는 분자 집합 𝑈 상에서의 𝑚개의 생화학 반응을 모은 것입니다.
+
+$$
+\begin{align*}
+&\alpha_{11}S_1 + \alpha_{21}S_2 + \cdots + \alpha_{n1}S_n \rightarrow \beta_{11}S_1 + \beta_{21}S_2 + \cdots + \beta_{n1}S_n \\
+&\alpha_{12}S_1 + \alpha_{22}S_2 + \cdots + \alpha_{n2}S_n \rightarrow \beta_{12}S_1 + \beta_{22}S_2 + \cdots + \beta_{n2}S_n \\
+&  \vdots \\
+&\alpha_{1m}S_1 + \alpha_{2m}S_2 + \cdots + \alpha_{nm}S_n \rightarrow \beta_{1m}S_1 + \beta_{2m}S_2 + \cdots + \beta_{nm}S_n
+\end{align*}
+$$
+
+Each with a respective reaction vector 𝑟₁, … , 𝑟ₘ.
+
+### Stochiometric matrix
+
+반응 벡터들인 𝑟₁, … , 𝑟ₘ을 모은 𝑛 × 𝑚 행렬을 Stochiometric matrix 행렬 𝑁이라고 합니다:
+
+$$
+\mathbf{N} = 
+\begin{bmatrix}
+\mathbf{r}_1 &|\mathbf{r}_2 &| \cdots & |\mathbf{r}_m \\
+\end{bmatrix}
+$$
+
+또는 equivalently하게, 
+
+$$
+\mathbf{N} = 
+\begin{bmatrix}
+\beta_{11} - \alpha_{11} & \beta_{12} - \alpha_{12} & \cdots & \alpha_{1m} & \beta_{1m} \\
+\vdots & &&\vdots  \\
+\beta_{n1} - \alpha_{n1} & \beta_{n2} - \alpha_{n2} & \cdots & \alpha_{nm} & \beta_{nm}\\
+\end{bmatrix}
+$$
+
+이 entries를 stoichiometric coefficients라고 합니다.
+
+
+Reactions는 두 그룹으로 나눌 수 있습니다:
+- Internal reactions
+- Boundary 혹은 exchange reactions
+
+**Boundary (exchange) reactions**는 다음 중 하나를 갖습니다:
+* 오직 non-positive stoichiometric coefficients만 있는 경우 (즉, zero와
+negative coefficients) - export 반응으로 알려져 있습니다
+* 오직 non-negative stoichiometric coefficients만 있는 경우 (즉, zero와
+positive coefficients) - import 반응으로 알려져 있습니다
+
+**Internal reactions**은 적어도 하나의 negative coefficient와 하나의 positive coefficient를 포함합니다 (즉, 적어도 하나의 반대 부호를 가진 coefficients 쌍이 하나 이상 있습니다) 이는 export되거나, import된 분자가 없는, 완전히 internal 분자들끼리 일어난 반응을 의미합니다. 
+
+예시 stoichiometric matrix를 살펴봅시다.
+
+$$r1:\phi \to A$$
+
+$$r2: B \to \phi$$
+
+$$r3: A \to B$$
+
+이 반응들은 sthochiometric matrix로 나타내질 수 있습니다.
+
+$$
+N = 
+\begin{bmatrix}
+1&0&-1 \\
+0&-1&1
+\end{bmatrix}
+$$
+
+아래 반응 또한 동일한 stochiometric matrix를 가집니다.
+
+$$r1: A \to 2A$$
+
+$$r2: 2B \to B$$
+
+$$r3: A \to B$$
+
+## Metabolic Networks
+
+Metabolic Networks는 생화학 반응들의 집합을 나타내며 이를 통해 일련의 대사물질들이 서로 transformed되고 environment와 exchange(즉, import 및 export)됩니다.
+
+Metabolic Networks는 다음과 같이 stoichiometric matrix에 의해 표현됩니다:
+
+- Row는 Metabolites를 나타냅니다.
+- Column은 Reactions를 나타냅니다.
+- Entries는 Stoichiometric coefficients입니다:
+  - Negative coefficients는 Substrate을 나타냅니다.
+  - Positive coefficients는 Product를 나타냅니다.
+
+아래는 example stoichiometric matrix입니다.
+
+![](./metanet.PNG)
+
+### Reaction Rate 
+
+Reaction Rate 또는 Reaction Flux, $v_j$는 반응 $r_j$의 conversion rate, 즉 반응물에서 생성물로의 Throughput을 의미합니다.
+
+Reaction rate는 physical quantitiy(물리량)이므로, 관련 유닛을 가집니다. constraint-based modeling에서 Flux는 다음과 같이 표현됩니다.
+
+$$v=\frac{mol}{gDW\cdot h}$$
+
+Flux가 물질의 농도와 시간에 매치한다는 것을 볼 수 있습니다.  
+
+Reaction Rate는 Metabolite concentration과도 연관이 있습니다. 
+
+Metabolite 𝑋𝑖의 농도는 시간이 지남에 따라 바뀝니다.
+
+- 𝑋𝑖를 생성하거나 합성하는 반응
+- 𝑋𝑖를 소비하거나 분해하는 반응
+
+Metabolite 𝑋𝑖의 농도의 시간적 변화 정도는 해당 반응의 반응 속도와 𝑋𝑖가 반응에 들어가는 몰 농도의 곱과 같습니다.
+
+- 𝑋𝑖를 **produce**하는 반응은 그 농도의 증가에 **positive**하게 기여합니다.
+- 𝑋𝑖를 **consume**하는 반응은 그 농도의 감소에 **negative**하게 기여합니다.
+
+$\Delta t$를 일정 작은 시간 간격이라고 가정했을 때, 시간 $t$에서 $t+\Delta t$까지 Metabolite $X_i$의 농도 변화는 다음과 같습니다.
+
+$$x_i(t+\Delta t)-x_i(t)$$
+
+농도의 변화율(rate of change in concentration)은 다음과 같습니다:
+
+$$\frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}$$
+
+이는 다음과 같이 표현할 수도 있습니다.
+
+>             $X_i$ 생성 반응 constribution - $X_i$ 소비 반응 constribution
+
+Stoichiometric matrix $N$의 i번째 행 $N_i$은 metabolite $X_i$를 정의합니다.
+
+따라서 $v$가 모든 vectors의 Reaction rates라면, 다음과 같습니다:
+
+$$\frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}=N_{i}\cdot v(t)$$
+
+이를 $\Delta t \to 0$에 대해 극한값을 취하면: _중요하지 않음_
+
+$$\lim_{\Delta t \to 0} \frac{x_i(t+\Delta t)-x_i(t)}{\Delta t}= \lim_{\Delta t \to 0}N_{i}\cdot v(t)$$
+
+$$\frac{dx_i}{dt}=N_{i}\cdot v(t)$$
+
+여기서 $v(t)$는 일반적으로 다음과 같은 형태를 가집니다:
+
+$$ v(t)=
+\begin{bmatrix}
+v_1(t) \\
+v_2(t) \\
+\vdots \\
+v_i(t)
+\end{bmatrix}
+$$
+
+각 row는 각 Metabolite $X_i$에 대한 Reaction rate입니다.
+
+그렇다면 Metabolite $X_i$의 농도변화율은 다음과 같습니다:
+
+- $N_{m \times n}$이고, i가 row, j가 column을 가리킬 때, 
+
+$$\frac{dx_i}{dt}=v_1(t)+\dots+v_i(t)$$
+
+따라서, 
+
+$$
+\begin{bmatrix}
+\frac{dx_1}{dt} \\
+\vdots\\
+\frac{dx_i}{dt}
+\end{bmatrix}
+=N_{i}\cdot v(t)
+$$
+
+$N_{i}\cdot v(t)$에 대한 간단한 예시를 들어보도록 하겠습니다.
+
+> 
+> $$ N_{i}\cdot v(t)=
+> \begin{bmatrix}
+> 1&0&-1 \\
+> 0&-1&1
+> \end{bmatrix}
+> \begin{bmatrix} v_1 \\
+> v_2 \\ 
+> v_3 \end{bmatrix}$$
+> 
+> 따라서, 각 Metabolite A와 B의 Reaction rate는 다음과 같이 정의됩니다.
+> 
+> $$N_{A}\cdot v(t)=v_1 -v_3$$
+> 
+> $$N_{B}\cdot v(t)=v_3 -v_2$$
+> 
+> Reaction rate의 changing rate는 다음과 같습니다:
+> 
+> $$\frac{x_A(t+\Delta t)-x_A(t)}{\Delta t}$$
+> 
+> $$\frac{x_B(t+\Delta t)-x_B(t)}{\Delta t}$$
+
+Reaction rate는 다음과 같은 요소에 의해 결정됩니다:
+- metabolites의 농도, 𝑥
+- 반응을 촉매하는 효소의 농도, 𝐸
+- activator / inhibitor 의 농도
+- 효소의 촉매 속도인 catalytic rate, $𝑘_{𝑐𝑎𝑡}$
+
+즉, 반응 $r_j$에 대해서, 
+
+$$v_j=f_j(x,E,k)$$
+
+그러나, 실제 현실의 metabolic modeling에선, 우리는 여러 effectors와 kinetic paramters등 정확히 알지 못하는 것이 매우 매우 많습니다. 따라서 $v_j=f_j(x,E,k)$는 정확히 specified 될 수 없습니다. 
+
+이 우리가 모르는 많은 변수들을 계산에서 제외하고, 너무나 복잡하여 계산이 불가능한 모델링을 간단하게 만들기 위해서, steady state의 개념을 도입합니다.
+
+### Steady State
+
+Steady State는 모델을 간소화하고 분석을 용이하게 하기 위해 사용됩니다. steady state에서는 metabolic network 내 대부분의 변수들이 일정한 값을 유지하기 때문에, 모델링이 더 간단해집니다. 
+
+많은 생물학적 실험은 일정한 조건에서 수행되며, 이러한 조건에서 steady state에서의 모델을 사용하여 실험 결과를 설명하고 예측할 수 있습니다.
+
+또한, 생물의 항상성에 의해 대부분의 생물학적 시스템은 외부 환경 변화에도 불구하고 상대적으로 안정된 상태를 유지합니다. 따라서 steady state에서의 모델은 실제 상황을 잘 근사합니다.
+
+이런 steady state의 concept에서, 다음 조건들이 성립합니다.
+
+일정 기간 동안 환경이 변하지 않으면
+- 유전자 발현은 상대적으로 일정합니다.
+- 효소 수준은 변하지 않습니다.
+
+따라서 metabolites concentrate도 일정하게 유지됩니다.
+
+또한, metabolic pool에서 system 외부로 나가는 것은 들어오는 것과 같습니다. 
+
+이 조건 하에 system이 steady state에 있다고 가정됩니다.
+
+일반적으로, change in metabolism은 초 단위에서 발생하는 반면, 단백질 수준 및 유전자 발현의 변화는 분 단위 또는 시간 단위로 발생합니다. 이러한 시간적 차이는 대사 활동 및 단백질 수준 및 유전자 발현 간의 특성적인 차이 때문에 발생합니다.
+
+Thermodynamic equilibrium은 대사 과정에서의 하나의 안정상태 형태입니다. 이는 metabolic pool에 입-출이 없고 metabolic pool 내에서 물질의 농도가 일정하게 유지되는 상태를 의미합니다.
+
+따라서, 
+
+$$\frac{dx_i}{dt}=N_{i}\cdot f(t)=N_{i}\cdot v(t)=0$$
+
+이고, 다음과 같이 쓸 수 있습니다.
+
+$$Nv=0$$
+
+시스템이 일단 steady state에 있으면 농도에 변화가 없는 한 시스템에서 벗어나지 않기 때문에 시간에 대한 의존도는 낮아질 수 있습니다.
+
+**이제, Reaction rate를 variable로 하고, stoichiometric matrix에 해당하는 coefficients를 사용하여 linear system을 구축합니다.**
+
+이 **linear equation system의 해**는 metabolic network가 support 할 수 있는 **set of all steady states**에 해당합니다. 
+
+steady state의 가정 하에, 반응들의 농도변화 예를 살펴보도록 하겠습니다.
+
+![](./steady1.PNG)
+
+* $v_{ex}$는 export reaction을 의미합니다.
+* $v_2$는 reversible reaction입니다. $Nv=0$임을 알고, v가 뭔지는 모를 때에도, 우리는 어떤 반응이 irreversible이고 어떤 반응이 reversible인지는 알 수 있습니다. 
+* reversible reaction은 두개의 forward-/backward irreversible reaction으로 분리할 수 있습니다. 
+* 따라서, 위의 예시에서 5개의 Metabolites와 7개의 reactions, 즉 $N_{5 \times 7}$의 stoichiometric matrix를 생성할 수 있습니다. 
+
+따라서, 위의 예시에서 다음과 같은 식을 얻을 수 있습니다.
+
+![](./steady3.PNG)
+
+이는 결국 $Nv=0$의 형태입니다.
+
+그러나 일반적으로, 대사 네트워크에는 사용 가능한 물질보다 더 많은 반응이 포함되어 있습니다. 이는 본질적으로 불완전한 linear equation system을 유발하며, 무한대로 많은 solution이 있을 수 있습니다. 
+
+이러한 space of solutions를 좁히는 것과 biologically relevant solution을 식별하는 것이 우리의 목적입니다.
+
+
+## Flux Balance Analysis - FBA
+
+세포가 steady state에 도달하는 데 영향을 미치는 과정은 무엇일까요?
+- 효소 농도와 activity 조절
+- 효소 촉매 속도에 대한 evolutionary pressure
+
+Cellular metabolism은 적응을 극대화하기 위해 진화했다는 가정 하에, 풍부한 배지에서 성장 중인 미생물에게는 이는 성장을 극대화하는 것과 일치합니다.
+
+Metabolic reactions에서 성장으로의 규모를 어떻게 연결할 수 있을까요?
+
+Biomass composition은 다양한 검사를 통해 획득할 수 있습니다
+- DNA
+- RNA
+- 지질
+- 단백질
+- 아미노산
+- 탄수화물
+
+그런 다음 Growth는 이러한 precursors를 biomass으로 변환하는 합성 반응의 속도로 모델링될 수 있습니다.
+
+반응 속도는 일정한 하한값(lower bound)과 상한값(upper bound)을 따릅니다.
+
+$$v_{j,min} \leq v_j \leq v_{j,max}$$
+
+lower bound가 0으로 설정되면, 반응은 irreversible reaction, 즉 비가역적 반응으로 간주됩니다.
+
+$$0 \leq v_j \leq v_{j,max}$$
+
+그렇지 않으면, lower bound가 음수인 경우, 반응은 가역적입니다.
+
+$$a \leq v_j \leq b$$
+
+반응의 lower bound과 upper bound가 모두 0이면, 해당 반응은 플럭스를 운반하지 않으며, 차단된 상태로 간주됩니다. 이를 **blocked reaction**이라 합니다.
+
+Upper bound는 일반적으로 큰 수로 설정되거나 (예: 1000), 데이터로부터 결정될 수 있습니다. 예를 들어, 최대 반응 속도 (𝑉𝑚𝑎𝑥 = $𝑘_{𝑐𝑎𝑡}𝐸$)가 알려져 있는 경우입니다.
+
+측정된 nutrient uptake나 product excretion을 특정하고 모델에 통합할 수 있습니다.
+
+* Reaction boundaries
+* Optimization of biomass
+
+이 둘을 결합하여, linear programming 문제로 표현할 수 있습니다!
+
+> **growth as the optimum $z^*$**
+>$$z^*=\mathbf{max}\, \; c^Tv$$
+>s.t.
+>$$Nv=0$$
+>$$v_{min} \leq v_j \leq v_{max}$$
+>where
+>$$c_i =
+>\begin{cases} 
+> 1,\; i \; corresponds\; to \; r_{bio} \\ 
+> 0,\; otherwise 
+> \end{cases}
+> $$
+
+
+FBA는 주어진 nutirent에 대한 product의 이론적 최대량을 계산합니다. 
+
+growth뿐 아니라 다른 여러 objective functions를 도입할 수 있으며, 따라서 현대 metabolic engineering의 기본 근간이 됩니다.
+
+### Metabolic Network Reconstruction
+
+다음 과정을 거친다.
+
+![](./recons.PNG)
+
+FBA, 혹은 다른 Analysis Methode를 위해 필요한 Metabolic Network의 정보는 다음과 같습니다. 
+
+1. Full Name (**rxnNames**)
+2. Short name (**rxns**)
+3. Formula
+4. Gene-reaction association
+(**rules**)
+1. Genes (**genes**)
+2. Proteins (proteins)
+3. Cellular Systems (subSystems)
+4. Reaction direction (rev)
+5. Flux lower bound (**lb**)
+6.  Flux upper bound (**ub**)
+7.  EC Number (rxnECNumber)
+
+#### Defining the biomass reaction
+
+정리하기엔 너무 얕고 distributed된 내용이다. 강의 slides 보면서 공부하자. lecture 4 후반부이다.
+#### (Non-) Growth associated maintenance 
+
+same
+
