@@ -67,7 +67,7 @@ Matrix multiplication을 살펴보자.
 $$A= 
 \begin{bmatrix}
 a_{11} & ... & a_{1n} \\
-... & & ... \\
+\vdots & & \vdots \\
 a_{m1} & ... & a_{mn}
 \end{bmatrix}
 $$
@@ -77,7 +77,7 @@ $$
 $$b=
 \begin{bmatrix}
 b_1\\
-...\\
+\vdots\\
 b_n
 \end{bmatrix}
 $$
@@ -88,7 +88,7 @@ $$
 \begin{bmatrix}
 a_{11}b_1+a_{12}b_2+...+a_{1n}b_n\\
 a_{21}b_1+a_{22}b_2+...+a_{2n}b_n\\
-...\\
+\vdots\\
 a_{m1}b_1+a_{m2}b_2+...+a_{mn}b_n
 \end{bmatrix}
 $$
