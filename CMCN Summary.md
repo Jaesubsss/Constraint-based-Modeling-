@@ -50,6 +50,12 @@
     - [Full Coupling](#full-coupling)
     - [Linear Fractional Program - LFP](#linear-fractional-program---lfp)
       - [Charnes-Cooper Transformation](#charnes-cooper-transformation)
+  - [Minimization of Metabolic Adjustment - MOMA](#minimization-of-metabolic-adjustment---moma)
+    - [Performance of mutatns](#performance-of-mutatns)
+    - [MOMA Hypothesis](#moma-hypothesis)
+    - [Quadratic programming - QP](#quadratic-programming---qp)
+    - [MOMA Formulation](#moma-formulation)
+  - [Regulatory on/off Minimization - ROOM](#regulatory-onoff-minimization---room)
 
 
 ## Matrix Properties
@@ -1644,3 +1650,208 @@ $$t=\frac{1}{d^Tx+\beta}=\frac{1}{v_j}$$
 따라서, 원래 식을 다음과 같이 변경할 수 있습니다.
 
 $$\mathbf{max}\frac{c^Tx+ \alpha}{d^Tx+\beta}=c^Ty+\alpha t$$
+
+## Minimization of Metabolic Adjustment - MOMA
+
+### Performance of mutatns
+
+FBA의 중요한 응용 중 하나는 Knock-out 변이를 시뮬레이션하는 것입니다. 유전학에서 Knock-out 변이란 유전자의 삭제 또는 비활성화로 인해 해당 유전자가 부호화하는 단백질이 없어지는 현상을 말합니다. FBA에서 Knock-out 변이를 시뮬레이션하는 것은 해당되는 반응 플럭스를 제로로 제한하여 대사 네트워크에서 해당 반응을 제거하는 것입니다.
+
+예를 들어, 유전자 𝑔가 특정 반응 𝑟을 촉매하는 효소를 부호화하는 경우를 생각해봅시다. 유전자 𝑔의 Knock-out을 시뮬레이션하기 위해서는 해당 반응의 플럭스(𝑣𝑟)를 제로로 설정합니다. 이렇게 하면 대사 모델에서 유전자 𝑔와 관련된 효소 활동이 제거됩니다. 그런 다음 이 제약 조건을 가지고 FBA 문제를 해결하여 Knock-out 변이의 대사 형질을 분석할 수 있습니다.
+
+유전자 𝑔의 Knock-out을 𝑣𝑟 = 0로 설정하고 그 FBA LP를 해결함으로써 시뮬레이션됩니다. FBA은 장기적 진화 압력 아래 성장을 최적화하는 유기체에 적용될 수 있습니다. 이는 knock-out을 쉽게 시뮬레이션할 수 있게 해줍니다.
+
+더 복잡한 경우에는 동일한 반응을 촉매하는 isoenzyme이나 여러 단위로 구성된 enzyme complex와 같은 경우가 있습니다. 이러한 경우들은 GPR Rule에 의거하여 모델링될 수 있습니다. 
+
+- **FBA가 knock out mutant의 flux distribution을 시뮬레이션하는데 적합합니까?**
+
+  FBA는 일반적으로 실험실에서 인공적으로 생성된 knock-out 변이에 대한 플럭스 분포 시뮬레이션에 **적합**합니다. 그러나 이러한 knock-out 변이는 보통 자연적으로 형성된 wild type과는 다른 진화적 압력에 노출되지 않습니다. 이들은 성장을 최적화하기 위한 플럭스를 조절하는 조절 메커니즘이 없을 수 있습니다. 이에 따라 knock-out 변이의 실현 가능한 공간(feasibility space)은 wild type과 다를 수 있습니다.
+
+  따라서, **mutant의 feasibility space가 wild type과 얼마나 연관되어있는지가 중요**합니다.
+
+  Mutant의 feasibility space는 일반적으로 wild type의 feasibility space에 포함됩니다. 이는 모든 플럭스 용량의 하한과 상한이 동일하다고 가정할 때 성립합니다. 
+
+**MOMA**는 gene deletions에 대한 optimal growth flux state의 가정을 완화합니다. mutant는 초기의 optimal growth flux distribution이 아닐 가능성이 높습니다. 이는 WT최적과 mutant 최적 사이의 중간상태일 것입니다. 
+
+**MOMA는 mutant optimum flux가 wild type의 optimum과 가까이 머무를 것 이라는 가설에 기반합니다.** 따라서 MOMA의 수학적 접근은 FBA에서 사용되는 LP와 다릅니다. 이는 Flux space에서 거리의 최소화를 포함합니다. 
+
+![](./moma.PNG)
+
+### MOMA Hypothesis
+
+MOMA는 주어진 벡터 v로 부터 mutant feasible space에서 거리가 최소인 점 w를 찾습니다. 
+
+knock-out feasible space에서 벡터 w를 찾는 것은 아래의 Euclidean distance를 이용하여, 거리가 최소화가 되는 지점을 계산함으로써 이루어질 수 있습니다.
+
+$$\sqrt{\sum_{i=1}^{m}(w_i-v_i)^2}$$
+
+위의 식은 아래의 식이 minimized될때 함께 최소화됩니다.
+
+$$\sum_{i=1}^{m}(w_i-v_i)^2$$
+
+우리는 이 식을 여러 파트로 분리할 수 있습니다. 
+
+$$\sum_{i=1}^{m}(w_i-v_i)^2=\sum_{i=1}^{m}(w_i^2-2w_iv_i+v_i^2)$$
+
+$$\sum_{i=1}^{m}w_i^2-2\sum_{i=1}^{m}w_iv_i+\sum_{i=1}^{m}v_i^2$$
+
+여기서 $w_i$가 우리가 찾길 원하는 벡터이고, $v_i$는 이미 정해진 값, 즉 상수로써, 계산에 영향을 미치지 않기 때문에 계산에서 제외될 수 있습니다. 
+
+가운데 $v_iw_i$부분은 다음과 같이 표현될 수 있습니다.
+
+$$\sum_{i=1}^{m}v_iw_i=v^Tw$$
+
+이 부분은 이미 쉽게 계산이 가능하지만, 맨 앞의 2차식 같은 경우 계산이 어렵습니다. 이를 계산하기 용이하게 아래와 같이 변환할 수 있습니다. 
+
+$$\sum_{i=1}^{m}w_i^2=w^TI_mw$$
+
+그러나 이 부분은 아직도 이차식으로 자리합니다. 이를 계산할 수 있는 방법으로는 여러가지가 있습니다.
+
+### Quadratic programming - QP
+
+Quadratic programming은 다음과 같은 형태로 존재합니다.
+
+$$\mathbf{min}\frac{1}{2}x^TQx+c^Tx$$
+
+s.t.
+
+$$Ax\leq b$$
+
+이는 앞의 quadratic part와 뒤의 linear part로 나뉠 수 있습니다. 따라서, 다음과 같이 쓰일 수 있습니다.
+
+$$w^TI_mw-(2v^T)w+const$$
+
+이는 위의 QP의 일반적 형태와 일치합니다. 
+
+---
+
+일반적으로 QP의 quadratic part에 사용되는 $Q$는 symmetric합니다. 이 $Q$의 eigenvalue를 사용할 수 있습니다.
+
+$$Qx=\lambda x$$
+
+$$(Q-\lambda I)x=0$$
+
+$$\mathbf{det}(Q-\lambda I)=0$$
+
+- 만약 $Q$의 모든 eigenvalues가 양수라면, matrix는 **positive definite**입니다.
+- 만약 몇 eigenvalues가 0이고, 나머지는 양수라면, matrix는 **positive semidefinite**입니다.
+- 만약 matrix가 positive semidefinite가 아니라면, **negative semidefinite** 혹은 **indefinite**입니다. 
+
+> - $Q$가 positive semidefinite이면, $x^TQx$는 convex입니다.    
+> - $Q$가 positive definite이면, $x^TQx$는 strictly convex입니다. 
+
+제곱 프로그래밍 (Quadratic Programming, QP) 문제를 해결하기 위해 다양한 접근 방법이 있습니다:
+
+- **Interior Point Method:** 
+  
+  Interior Point Method은 QP 문제를 해결하기 위해 Interior Point을 향해 이동하는 방법입니다. 이 방법은 주어진 제약 조건을 고려하면서 목적 함수를 최적화하는 접근 방법으로, global optimum solution을 찾는 데 효과적입니다.
+
+- **Active Set Method:** 
+  
+  Active Set Method은 문제를 푸는 동안 Active 제약 조건을 식별하고 해당 제약 조건에 대한 최적해를 찾습니다. 이 방법은 QP 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+
+- **Augmented Lagrangian Method:** 
+  
+  Augmented Lagrangian Method은 제약 조건이 있는 최적화 문제를 해결하기 위한 방법 중 하나입니다. 이 방법은 라그랑주안 함수를 수정하여 추가된 제약 조건을 고려합니다. 이 방법은 주어진 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+
+- **Conjugate Gradient Method:** 
+  
+  Conjugate Gradient Method은 QP 문제를 해결하기 위한 반복적인 최적화 방법입니다. 이 방법은 목적 함수의 기울기를 사용하여 최적화 문제를 해결하는 반복적인 접근 방법으로, 최적해를 찾기 위해 반복적으로 기울기를 수정합니다.
+
+- **Extensions to Simplex Algorithm:** 
+  
+  심플렉스 알고리즘은 선형 프로그래밍 문제를 해결하는 데 사용되지만, 일부 확장은 QP 문제를 해결하는 데 사용될 수 있습니다. 이 방법은 제약 조건을 고려하면서 목적 함수를 최적화하는 방법으로, 선형 및 이차 제약 조건을 동시에 고려합니다.
+
+### MOMA Formulation
+
+wild type $v$의 steady state flux distribution가 주어졌을 때, QP problem 형식의 MOMA는 다음과 같이 수학적으로 쓰일 수 있습니다.
+
+$$\mathbf{min}\;w^TI_mw-(2v^T)w$$
+
+s.t.
+
+$$Nw=0$$
+
+$$w_j=0$$
+
+$$\forall i,1 \leq i \neq j \leq m$$
+
+$$w_i^{min} \leq w_i \leq w_i^{max}$$
+
+biomass의 최적화는 MOMA식에 명시적으로 포함되어있지 않습니다. 
+
+유전자 Knock-out은 해당 반응의 플럭스를 제로로 설정하여 시뮬레이션됩니다. 이는 모든 isoenzyme이 특정 반응과 관련된 유전자가 삭제되거나 단백질 복합체의 모든 단위가 삭제된 경우에 수행됩니다 (비록 이것이 항상 생물학적 현실을 정확하게 반영하지는 않을 수 있습니다. 왜냐하면 어떤 단백질 복합체는 일부 단위가 제거되어도 일부 기능을 여전히 수행할 수 있기 때문입니다).
+
+MOMA는 FBA로 예측된 것보다 자연스럽게 더 낮은 수율을 나타냅니다. 이는 MOMA가 주어진 제약 조건을 충족하면서도 가능한 한 와일드 타입에 가까운 대사 상태를 찾기 때문입니다. 결과적으로, MOMA는 종종 FBA로 예측된 이상적인 최적 성장률보다는 부족한 성장률을 나타내며, 특히 네트워크가 유전자 Knock-out과 같은 변동을 경험하는 상황에서 더 그렇습니다.
+
+실험적 증거에 따르면, 많은 경우에 유전자 삭제 후 growth rate는 와일드 타입에 비해 감소하나, 이후 점차 증가하여 거의 와일드 타입 수준에 도달합니다.
+
+MOMA는 이러한 변화를 설명하는 한 가지 방법을 제공하지만, 이는 모든 플럭스에 대한 수많은 작은 변화를 내포하며, 몇 개의 큰 변화가 아닌 같은 값을 가진 적은 수의 플럭스에 대한 큰 변화를 내포합니다.
+
+이러한 특성들은 Euclidean norm을 반영합니다!
+
+## Regulatory on/off Minimization - ROOM
+
+세포는 유전자 Knock-out 이후의 플럭스 변화를 실현하기 위한 유전자 규제 변화를 최소화합니다: 이는 유전자 Knock-out 이후의 대사적 적응 비용을 최소화하려는 생물학적 전략을 반영합니다. 즉, 세포는 가능한 한 적은 유전자 규제 변경으로 플럭스 변화를 실현하려고 합니다.
+
+ROOM은 **Boolean On/Off** 로 간단하게 기술될 수 있습니다: 이는 유전자의 활성화 또는 억제를 간단한 On/Off 형태로 기술할 수 있다는 가정을 의미합니다. 따라서 각 유전자 규제 변경에는 크기에 관계없이 고정된 비용이 할당됩니다.
+
+ROOM은 다른 측정 항목을 사용하며, 충분히 큰 플럭스 변화를 최소화합니다. 이는 MILP(Mixed Integer Linear Programming)로 캐스팅됩니다. 각 반응 $i$에 대해 유의미한 플럭스 변화가 있는 경우 
+$y_i=1$로 표시되고, 그렇지 않으면 $y_i=0$입니다. $y_i$는 각 반응이 유의미한 플럭스 변화를 나타내는지 여부를 나타냅니다.
+
+$$
+\begin{cases}
+y_i=1, changes\\
+y_i=0, otherwise
+\end{cases}
+$$
+
+유의한 변화의 상한과 하한은 주어진 와일드 타입 플럭스 분포 $v$와 상대적 변화를 결정하는 $\delta$ 및 sensitivity bound $\epsilon$ 이 두 parameter에 기반하여 설정됩니다. $v_i^u$와 $v_i^l$은 각각 유의한 변화의 상한과 하한을 나타냅니다.
+
+따라서 ROOM을 수학적으로 나타낸 MILP 공식은 다음과 같습니다.
+
+$$min \sum_{i=1}^m y_i$$
+
+s.t.
+
+$$Nw=0$$
+
+$$w_j=0$$
+
+$$\forall i, 1 \leq i \leq m$$
+
+$$w_i^{min} \leq w_i \leq w_i^{max}$$
+
+$$\forall i, i \leq i \leq m, y_i \in \{0,1\}$$
+
+$$w_i-y_i(w_i^{max}-v_i^u) \leq v_i^u$$
+
+$$w_i-y_i(w_i^{min}-v_i^l) \geq v_i^l$$
+
+$$v_i^u = v_i + \delta|v_i| + \epsilon$$
+
+$$v_i^l = v_i - \delta|v_i| - \epsilon$$
+
+많기도 해라..
+
+binary value $y_i$값에 따라 위의 조건은 변화합니다. 
+
+- $y_i=1$의 경우,
+
+  flux change에 대한 상한과 하한 $v_i^u$와 $v_i^l$은:
+
+  $$w_i-w_i^{max}-v_i^u \leq v_i^u$$
+
+  $$w_i-w_i^{min}-v_i^l \geq v_i^l$$
+
+- $y_i=0$의 경우, 
+
+  flux change에 대한 상한과 하한 $v_i^u$와 $v_i^l$은:
+
+  $$w_i \leq v_i^u$$
+
+  $$w_i \geq v_i^l$$
+
+ROOM는 MOMA와 마찬가지로 biomass optimization를 고려하지 않습니다. MOMA는 유전자 Knock-out 후의 대사 네트워크의 최적 성장률을 찾는 데 중점을 두는 반면, ROOM은 유전자 규제의 변화를 최소화하여 대사 네트워크의 변화를 설명하는 데 중점을 둡니다.
+
+ROOM은 분기 지점에서 한 경로를 선택하는 경향이 있습니다. 이것은 "linearity hypothesis"이라고도 합니다. 이는 두 분기 모두를 통과하는 대신 한 분기만을 선택한다는 것을 의미합니다. 이는 ROOM이 다른 메트릭을 사용하여 플럭스를 평가하고 최소화하고 있기 때문에 발생합니다. MOMA가 주어진 조건에서 최적의 대사 상태를 찾으려고 하는 반면, ROOM은 유전자 규제의 변화를 최소화하려고 합니다.
