@@ -58,15 +58,16 @@
   - [Regulatory on/off Minimization - ROOM](#regulatory-onoff-minimization---room)
   - [Metabolic engineering](#metabolic-engineering)
     - [Bilevel Programming](#bilevel-programming)
-    - [**KKT conditions**](#kkt-conditions)
-- [\\end{bmatrix}](#endbmatrix)
-- [\\end{bmatrix}](#endbmatrix-1)
+    - [KKT conditions](#kkt-conditions)
       - [Equality Constrained Optimization](#equality-constrained-optimization)
-      - [Why is L(x, \\lambda) = f(x) of interest?](#why-is-lx-lambda--fx-of-interest)
+      - [Why is L(x, λ) = f(x) of interest?](#why-is-lx-λ--fx-of-interest)
       - [Equality, Inequality Constrained Optimization](#equality-inequality-constrained-optimization)
-      - [Why is $L(x, \\lambda, \\mu) = f(x)$ of interest?](#why-is-lx-lambda-mu--fx-of-interest)
+      - [Why is L(x, λ, μ) = f(x) of interest?](#why-is-lx-λ-μ--fx-of-interest)
       - [KKT conditions - sufficient](#kkt-conditions---sufficient)
     - [Duality LP](#duality-lp)
+    - [OptKnock](#optknock)
+    - [OptStrain](#optstrain)
+    - [OptReg](#optreg)
 
 
 ## Matrix Properties
@@ -719,7 +720,7 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
     
     > second entering variable은 $x_2$입니다. $x_2$의 coefficient로 각 right hand side의 값을 나눴을 때 얻어지는 값이 upperbound입니다. 
 - **Step VI**: Optimality를 확인합니다.
-두 번째 feasible solution도 최적이 아닙니다. 왜냐하면 목적 함수에 음의 계수가 포함되어 있기 때문입니다. 
+두 번째 feasible solution도 최적이 아닙니다. 왜냐하면 objective function에 음의 계수가 포함되어 있기 때문입니다. 
 더 많은 반복이 필요합니다. 
   > 다음 leaving variable은 최소 upperbound를 가지는 4번째 row의 basic variable인 $s_3$입니다.
 
@@ -765,11 +766,11 @@ $$5𝑥_1 + 3𝑥_2 + 2𝑥_3 - 𝑠_2 + 𝑤_2 = 11 $$
 
 $$𝑥_1 = 𝑥_2 = 𝑥_3 = 𝑠_1 = 𝑠_2 = 0, 𝑤_1 = 13, 𝑤_2 = 11 $$
 
-목적 함수는 다음과 같이 변환됩니다:
+objective function는 다음과 같이 변환됩니다:
 
 $$𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
 
-𝑤1 = 𝑤2 = 0인 솔루션은 실현 가능하지만, 𝑤1 > 0, 𝑤2 > 0인 솔루션은 그렇지 않습니다. 따라서 이러한 값들을 0으로 추동시키기 위해 대규모 상수 𝑀을 목적 함수에 도입할 수 있습니다. 이는 big-M Methode으로 알려져 있습니다.
+𝑤1 = 𝑤2 = 0인 솔루션은 실현 가능하지만, 𝑤1 > 0, 𝑤2 > 0인 솔루션은 그렇지 않습니다. 따라서 이러한 값들을 0으로 추동시키기 위해 대규모 상수 𝑀을 objective function에 도입할 수 있습니다. 이는 big-M Methode으로 알려져 있습니다.
 
 | Row num | Basic variable | 𝑧 | 𝑥1 | 𝑥2 | 𝑥3 | 𝑠1 | 𝑠2 | 𝑤1 | 𝑤2 | Right-hand side | Upper bound on entering variable |
 |---------|----------------|---|-----|-----|-----|-----|-----|-----|-----|------------------|---------------------------------|
@@ -1755,23 +1756,23 @@ $$\mathbf{det}(Q-\lambda I)=0$$
 
 - **Interior Point Method:** 
   
-  Interior Point Method은 QP 문제를 해결하기 위해 Interior Point을 향해 이동하는 방법입니다. 이 방법은 주어진 제약 조건을 고려하면서 목적 함수를 최적화하는 접근 방법으로, global optimum solution을 찾는 데 효과적입니다.
+  Interior Point Method은 QP 문제를 해결하기 위해 Interior Point을 향해 이동하는 방법입니다. 이 방법은 주어진 제약 조건을 고려하면서 objective function를 최적화하는 접근 방법으로, global optimum solution을 찾는 데 효과적입니다.
 
 - **Active Set Method:** 
   
-  Active Set Method은 문제를 푸는 동안 Active 제약 조건을 식별하고 해당 제약 조건에 대한 최적해를 찾습니다. 이 방법은 QP 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+  Active Set Method은 문제를 푸는 동안 Active 제약 조건을 식별하고 해당 제약 조건에 대한 최적해를 찾습니다. 이 방법은 QP 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 objective function를 함께 고려합니다.
 
 - **Augmented Lagrangian Method:** 
   
-  Augmented Lagrangian Method은 제약 조건이 있는 최적화 문제를 해결하기 위한 방법 중 하나입니다. 이 방법은 라그랑주안 함수를 수정하여 추가된 제약 조건을 고려합니다. 이 방법은 주어진 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+  Augmented Lagrangian Method은 제약 조건이 있는 최적화 문제를 해결하기 위한 방법 중 하나입니다. 이 방법은 라그랑주안 함수를 수정하여 추가된 제약 조건을 고려합니다. 이 방법은 주어진 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 objective function를 함께 고려합니다.
 
 - **Conjugate Gradient Method:** 
   
-  Conjugate Gradient Method은 QP 문제를 해결하기 위한 반복적인 최적화 방법입니다. 이 방법은 목적 함수의 기울기를 사용하여 최적화 문제를 해결하는 반복적인 접근 방법으로, 최적해를 찾기 위해 반복적으로 기울기를 수정합니다.
+  Conjugate Gradient Method은 QP 문제를 해결하기 위한 반복적인 최적화 방법입니다. 이 방법은 objective function의 기울기를 사용하여 최적화 문제를 해결하는 반복적인 접근 방법으로, 최적해를 찾기 위해 반복적으로 기울기를 수정합니다.
 
 - **Extensions to Simplex Algorithm:** 
   
-  심플렉스 알고리즘은 선형 프로그래밍 문제를 해결하는 데 사용되지만, 일부 확장은 QP 문제를 해결하는 데 사용될 수 있습니다. 이 방법은 제약 조건을 고려하면서 목적 함수를 최적화하는 방법으로, 선형 및 이차 제약 조건을 동시에 고려합니다.
+  심플렉스 알고리즘은 선형 프로그래밍 문제를 해결하는 데 사용되지만, 일부 확장은 QP 문제를 해결하는 데 사용될 수 있습니다. 이 방법은 제약 조건을 고려하면서 objective function를 최적화하는 방법으로, 선형 및 이차 제약 조건을 동시에 고려합니다.
 
 ### MOMA Formulation
 
@@ -1977,7 +1978,7 @@ nested된 내부의 optimization problem은 FBA로 간단하게 해결할 수 �
 * **KKT conditions**
 * **Dual problems**
 
-### **KKT conditions**
+### KKT conditions
 
 KKT(Karush-Kuhn-Tucker) condition은 제한이 있는 optimization problem의 해를 찾기 위한 필요 조건으로, 주어진 optimization problem에 대한 최적해의 조건을 나타냅니다.
 
@@ -2030,13 +2031,11 @@ $$\nabla f(x)=
 \frac{\partial f}{\partial x_1} \\
 \frac{\partial f}{\partial x_2}
 \end{bmatrix}
-=
-\begin{bmatrix}
+=\begin{bmatrix}
 4x_1 \\
 2x_2
 \end{bmatrix}
-=
-\begin{bmatrix}
+=\begin{bmatrix}
 0 \\
 0
 \end{bmatrix}
@@ -2068,6 +2067,7 @@ $$(x_1+x_2=1) \to (1-x_1-x_2=0)$$
 
 ---
 
+
 #### Equality Constrained Optimization
 
 이렇듯, 다음과 같은 equality constrained optimization 문제가 있을 때:
@@ -2098,7 +2098,7 @@ $$\nabla_xL(x,\lambda)=\nabla_xf(x)-\sum_{i=1}^m \lambda_i\nabla_xh_i(x)$$
 
 즉, Lagrangian $\lambda_i$이 0일 때, $L$과 $\nabla_xf(x)$도 0이 되기 때문에, homogeneous한 $f(x)$를 풀 수 있습니다. 
 
-#### Why is L(x, \lambda) = f(x) of interest? 
+#### Why is L(x, λ) = f(x) of interest? 
 
 왜 $L(x, \lambda)$가 중요합니까?
 
@@ -2201,7 +2201,7 @@ $$g_i(x)- b_i=0$$
 
 $$L(x, \lambda, \mu) = f(x) + \sum_{i=1}^{m} \lambda_i (c_i - h_i(x)) + \sum_{i=1}^{l} \mu_i (b_i - g_i(x))$$
 
-#### Why is $L(x, \lambda, \mu) = f(x)$ of interest?
+#### Why is L(x, λ, μ) = f(x) of interest?
 
 $L(x, \lambda, \mu)$가 중요한 이유는 다음과 같습니다.
 
@@ -2312,3 +2312,197 @@ KKT condition이 optimality를 보장하는 경우는 언제인가요?
 만약 equlities도 고려된다면, KKT conditions는 그 자체로 optimality를 보장하는데 충분조건이 됩니다. 이때에는 대응하는 함수 $h_i(x)$가 linear해야 합니다.
 
 ### Duality LP
+
+LP의 duality는 LP문제와 이와 관련된 Dual problem 간의 특별한 관계를 나타냅니다. 일반적으로 LP문제의 Duality는 **Primal problem**과 **Dual problem**간의 관계로 설명됩니다. 
+
+Primal problem은 LP 문제의 원래 형태로, 주어진 objective function를 최대화하거나 최소화하면서 주어진 제약 조건 하에서 변수를 결정하는 것입니다. 이를 일반적으로 다음과 같이 표현할 수 있습니다:
+
+$$\text{max }c^Tx$$
+
+s.t.
+
+$$Ax \leq b \\
+x \geq 0$$
+
+이 primal problem의 lagrangian은 다음의 형태를 가집니다.
+
+$$L(x,\mu)=c^Tx+\mu(b-Ax)$$
+
+이를 다음과 같이 바꿔쓸 수 있습니다.
+
+$$L(x,\mu)=\mu b+(x^T-\mu A)x$$
+
+이 primal problem은 다음과 같은 dual problem을 가집니다.
+
+$$\text{min }\lambda b$$
+
+s.t.
+
+$$\lambda A \geq c^T \\
+\lambda \geq 0$$
+
+이 Primal problem과 Dual problem사이엔 Duality가 존재합니다. 이는 다음과 같은 성질을 가집니다.
+
+* **Optimality Property:**
+
+  주어진 primal과 dual은 다음과 같은 관계를 가집니다.
+
+  $$c^Tx=\lambda b$$
+
+  즉, **primal의 optimum과 dual의 optimum은 서로 같습니다.** 
+
+* **Unboundedness Property:**
+
+  **만약 두 문제중 하나가 unbounded이면, 다른 하나는 infeasible합니다.** 즉, primal이나 dual중 하나가 무한대로 발산하면, 즉 경계가 없다면, 다른 문제는 해를 갖지 않습니다.
+
+* **Strong Duality Property:**
+
+  만약 primal LP의 Optimum이 존재하면, Dual problem의 Optimum또한 존재합니다. 이는 위의 Optimality Property와 기본적으로 같습니다. 
+
+  $$\text{max }c^Tx=\text{min }\lambda b$$
+
+---
+
+위에서 주어진 primal problem에 대해, $(c^T-\lambda A)x=0$는 dual의 **complementary slackness condition**입니다. 
+
+이는 primal problem의 decision variable x와 dual problem의 lagrangian $\lambda$ 사이의 조건입니다. 
+
+이것은 모든 decision variable x와 그에 상응하는 lagrangian λ에 대해 해당 변수에 대한 slack variable가 0이거나 decision variable가 0임을 의미합니다. 즉, 어떤 해 x에 대해, $c^T-\lambda A=0$이거나 $x=0$입니다. 
+
+이것은 primal problem에서, decision variable을 증가시킬 때, 이에 상응하는 dual variable이 얼마나 증가해야 하는지를 결정하는 조건입니다. 
+
+따라서, $\lambda_i>0$이면 해당 resource가 완전히 사용된것을 나타내며, $\lambda_i=0$이면 해당 resource가 완전히 사용되지 않았음을 의미합니다. 
+
+Dual variable $\lambda$는 **shadow prices**라고도 불립니다. 이들은 primal problem의 constraints를 하나씩 완화(relax)했을 때 objective function 값이 얼마나 변하는지를 나타내는데 사용될 수 있습니다. 따라서, shadow price는 각 constraints에 대한 "가용성"을 나타냅니다.
+
+각 constraint에 해당하는 shadow price는 해당 constraint를  relax할 때 objective function 값이 얼마나 증가하거나 감소하는지를 나타냅니다.
+
+따라서, shadow price는 해당 constraint의 중요성을 나타내며, 해당 자원의 한 단위의 가격이나 가치로 해석될 수 있습니다. 각 constraint는 shadow price를 가집니다. 
+
+### OptKnock
+
+다음과 같은 Bilevel Program이 주어졌을 때,
+
+$$\text{max } v_{chemical}$$
+
+s.t.  $\{$
+
+$$\text{max } v_{bio}$$
+
+s.t $\{$
+
+  $$Nv=0$$
+
+  $$\forall i, 1 \leq i \leq m$$
+
+  $$y_iv_i^{min} \leq v_i \leq y_iv_i^{max}$$
+
+  $$y_i \in \{0,1\}$$
+
+  $$\sum_{i=1}^m(1-y_i) \leq K$$
+
+  $$\}\}$$
+
+OptKnock은 위 문제에서 Duality of LP와 KKT conditions를 고려하여 구성될 수 있습니다. 이에 대해 두가지 방법이 있습니다. 
+
+* 내부 LP의 Dual problem을 구성하고, weak optimality condition을 적용합니다.
+* 내부 LP에 대한 KKT condition을 구성합니다.
+
+이 중 OptKnock은 위 방법을 이용하여 구성됩니다.
+
+![](./optknock.PNG)
+
+### OptStrain
+
+우리는 Knock-out을 이용해 production을 increase 하는 방법을 알아보았습니다. 이제, knock-out에 추가적으로 **non-native gene을 삽입함으로써 production을 증가**시킬 수 있는 방법에 대해 알아봅시다.
+
+OptStrain은 OptKnock에 대한 확장기능으로써, non-native gene을 insertion할 수 있는 방법입니다. 
+
+다음 네 가지 스텝을 통해 이루어질 수 있습니다.
+
+1. Creation of a universal database of metabolic reactions
+   
+   * 먼저, 모든 대사 반응에 대한 유니버셜 데이터베이스를 생성합니다. 이 데이터베이스는 대사 네트워크에서 가능한 모든 반응을 포함하고 있습니다.
+   * 이 데이터베이스는 주로 KEGG를 기반으로 합니다. KEGG는 대사 경로 및 생물학적 기능과 관련된 다양한 생물학적 정보를 포함하는 대표적인 데이터베이스입니다. 여기서 정보를 추출합니다.
+   * 반복 단위 또는 unspecified alkyl groups가 있는 R을 제거합니다. 일부 화합물은 반복 단위 또는 알킬기(R)와 같은 unspecified 기능을 가지고 있을 수 있습니다. 이러한 화합물은 데이터베이스에서 제거될 수 있습니다.
+   *  화합물 간의 반응이 균형을 이루지 않는 경우, 이러한 반응은 불균형한 것으로 간주되고 제거됩니다. 이는 대사 네트워크의 정확성을 유지하기 위해 수행됩니다.
+2. Maximum theoretical yield calculation for a product given a substrate origin
+
+   * 주어진 substrate origin에 대한 최대 이론적 수율을 계산합니다. 여기선 origin(native or non-native)나 사용된 반응의 개수에 대해선 고려하지 않습니다.
+   * 대상 metabolite의 생산 및 소비 반응의 합을 최대화합니다. 
+   ![](./step2.PNG)
+
+3. Identification of stoichiometrically balanced pathway(s) that minimizes the number of non-native functionalities
+
+   * non-native functionalities의 개수를 최소화하는 stoichiometrically balanced pathway를 찾습니다. 
+  ![](./step3.PNG)
+   * maximal production과 minimal non-native functionalities의 최적성 기준을 모두 보장하면서 alternative solution을 식별하는 방법은 다음과 같습니다:
+     * MILP 문제를 반복적으로 해결하고, 추가 constraint를 포함하여 해답을 찾습니다. 이를 **integer cut**이라 합니다.
+    
+     $$y_1+y_2+y_3\leq 2$$
+
+      이는 이미 선택된 모든 세개의 반응이 다시 함께 식별되지 않도록 합니다. 즉, 다른 alternative solution을 찾아냅니다.
+
+
+4. Incorporation of the non-native biotransformation into the production host and further optimization
+ 
+  * non-native biotransformation을 수행하기 위해 host의 metabolic network에 reactions를 포함시킵니다. stoichiometric matrix를 확장시킵니다.
+  * product of interest와 growth를 커플링(결합)합니다. 이는 host의 metabolic network에서 생산 반응의 흐름을 최대화하면서 성장을 최대화하거나 최소화하는 것을 의미합니다. 
+
+OptStrain의 적용 사례를 봅시다.
+
+
+> E. coli를 호스트로 사용하기로 결정했습니다. 이를 위해 KEGG 데이터베이스를 Methylobacterium extroquens AM1의 반응과 결합하여 대사 네트워크의 범용 데이터베이스를 생성했습니다. 이 데이터베이스에는 탄소, 산소, 수소, 질소, 황, 인으로 균형 조정된 약 3000개의 반응이 포함되어 있습니다.
+> 
+> 다양한 하부원료 선택이 가능하며, 이에는 펜토스 및 헥소스 설탕과 같은 당류뿐만 아니라 아세테이트, 라크타트, 말산, 글리세롤, 피루베이트, 성취산, 메탄올 등이 포함됩니다.
+> 
+> 제 2단계에서는 수소 생산량을 최대화하려고 합니다. 이는 메탄올을 사용하여 달성되며, 이는 수소 대 탄소 원자의 비율이 가장 높기 때문입니다. 메탄올을 소비하는 경우, 0.126 g의 수소를 달성할 수 있습니다. 단위당 수소 생산량은 메탄올 소비량당 수소 생산량을 의미합니다.
+> 
+> Methylobacterium extorquens AM1은 메탄올을 탄소 및 에너지원으로 사용하여 생존할 수 있는 선택적 메틸로트로프(facultative methylotroph)입니다. 이러한 유형의 미생물은 탄소원으로 메탄올을 사용할 수 있지만, 다른 탄소원도 사용할 수 있습니다.
+> 
+> 수소 생산을 가능하게 하는 비기질 반응이 필요한데, 이는 이 미생물이 메틸로트로프로서 일반적으로 수행하지 않는 화학 반응입니다. 이 반응은 일반적으로 수소를 생성하는 수소화효소(hydrogenase)에 의해 수행됩니다. 이는 프로톤을 수소로 환원시키는 반응을 포함합니다.
+> 
+> 또 다른 비기질 반응은 N5, N10-메테닐테트라하이드로메탄오프테린 수소효소(N5,N10-methenyltetrahydromethanopterin hydrogenase)에 의해 수행됩니다. 이 반응은 테트라하이드로메탄오프테린을 테트라하이드로메탄오프로틴과 수소로 전환하는 반응입니다.
+> 
+> 이러한 비기질 반응이 필요한 이유는 메틸로트로프가 일반적으로 수행하지 않는 화학 반응이기 때문입니다. 이러한 유형의 미생물로부터 수소를 생산하는 것은 이전에 어려웠으며, 이러한 비기질 반응을 도입함으로써 새로운 기회가 제공됩니다.
+
+---
+
+### OptReg
+
+OptReg은 또한 OptKnock의 또 다른 확장입니다. OptReg에서는 Knock-out뿐만 아니라, down- or up-regulated되어야 하는 biochemical reactions를 식별합니다. 이를 통해 최적화를 위한 조금 더 정교한 metabolic engineering strategie를 달성합니다.
+
+이 방법은 플럭스가 주어진 안정 상태 플럭스보다 충분히 작거나 크다면 down/up-regulated된 것으로 간주합니다. 이것은 regulation strength parameter인 𝐶로 알려진 파라미터를 고려함으로써 달성됩니다.
+
+이 parameter는 반응이 변경되기 위해 극복해야 하는 임계값을 정량화합니다. 이 파라미터는 0과 1 사이의 값을 가질 수 있습니다. 𝐶의 값이 높을수록 반응이 조절되기 위해 요구되는 조건이 강화됩니다.
+
+$v_{j,L}^0$와 $v_{j,U}^0$는 steady state에서 허용되는 flux를 나타냅니다. 이는 FVA를 통해 얻어질 수 있습니다. 또한 여기서 모든 반응은 irreversible하다고 가정합니다.
+
+* 주어진 Flux가 steady state Flux보다 충분히 작으면, down regulated reaction으로 간주됩니다. 따라서 flux의 range는 다음과 같습니다:
+
+  $$v_j^{min}\leq v_j \leq v^0_{j,L}(1-C)+v_j^{min}C$$
+
+* 주어진 Flux가 steady state Flux보다 충분히 크면, up regulated reaction으로 간주됩니다. 따라서 flux의 range는 다음과 같습니다:
+
+  $$v^0_{j,U}(1-C)+v_j^{max}C \leq v_j \leq v_j^{max}$$
+
+up regulation, down regulation, 그리고 knock-out을 판별하기 위해 총 3개의 binary variables가 필요합니다.
+
+$$y_j^k=0 \text{, for knocked-out}\\
+y_j^d=0 \text{, for downregulated} \\
+y_j^u=0 \text{, for upregulated}$$
+
+또한, 한 반응은 동시에 업-다운 조절되거나 녹아웃될 수 없습니다.
+
+$$(1-y_j^k)+(1-y_j^d)+(1-y_j^u)\leq 1$$
+
+또 전체 조절의 총량을 제한할 수 있습니다.
+
+$$\sum_j(1-y_j^k)(1-y_j^d)(1-y_j^u)\leq L$$
+
+또한 한 반응이 reversible하다고 할 때, 순방향과 역방향이 모두 같은방향으로 regulated될 수 없습니다.
+
+$$y_{j,f}^d+y_{j,b}^d \geq 1\\
+y_{j,f}^u+y_{j,b}^u \geq 1$$
+
+![](./optreg.PNG)
