@@ -68,6 +68,10 @@
     - [OptKnock](#optknock)
     - [OptStrain](#optstrain)
     - [OptReg](#optreg)
+  - [parsimonious enzyme usage FBA- pFBA](#parsimonious-enzyme-usage-fba--pfba)
+    - [with reaction splitting](#with-reaction-splitting)
+    - [without reaction splitting](#without-reaction-splitting)
+    - [Minmax objective](#minmax-objective)
 
 
 ## Matrix Properties
@@ -2506,3 +2510,142 @@ $$y_{j,f}^d+y_{j,b}^d \geq 1\\
 y_{j,f}^u+y_{j,b}^u \geq 1$$
 
 ![](./optreg.PNG)
+
+## parsimonious enzyme usage FBA- pFBA
+
+### with reaction splitting
+
+우리는 대사 네트워크를 모델링할 때 세포 또는 생물학적 시스템이 목적을 최적화한다고 가정합니다. 그러나 이러한 모델링 단계는 계산 가능한 수학적 프로그래밍 접근 방식을 필요로 합니다. 이를 위해서는 계산상 효율적인 방법이 필요합니다.
+
+예를 들어, Flux Coupling Analysis는 선형 분수 프로그램에 기반한 방법입니다. 그러나 선형 분수 프로그램은 일반적으로 계산상 매우 복잡하고 비싸기 때문에, 좀 더 효율적인 계산을 위해 LP(선형 프로그래밍)으로 변환해야 합니다.
+
+이러한 변환 기법 중 하나로 Chalmers-Cooper 변환을 사용할 수 있습니다. 이 변환은 선형 분수 프로그램을 선형 프로그래밍으로 변환하는 방법 중 하나입니다. 이를 통해 계산상 효율적인 방식으로 Flux Coupling Analysis를 수행할 수 있습니다.
+
+pFBA (parsimonious enzyme usage FBA)는 효율적인 대사 토폴로지를 결정하는 데 기여할 수 있는 유전자 및 단백질의 하위 집합을 결정하는 것을 목표로 합니다. 진화 생물학적으로, 효소를 만드는데 일반적으로 비용이 발생하고, 효소를 유지 및 합성을 실행하는 사이클에서 또한 비용이 발생하기 때문입니다. 때문에 **pFBA에서는 추가적으로 Flux 자체를 최소화** 합니다. 이를 위해 대사 네트워크에서 모든 가역 반응이 두 개의 가역 반응으로 분리됩니다.
+
+이는 두가지 스텝으로 이루어집니다.
+
+1. Optimal biomass 결정을 위한 FBA:
+
+  먼저 FBA를 풀어서 최적의 생체량을 결정합니다. FBA는 대사 네트워크에서 흐르는 대사 흐름을 최적화하여 특정 조건에서의 최대 세포 성장률을 예측합니다.
+
+2. 총 Flux 최소화:
+
+  이후, 전체 대사 네트워크에서 흐르는 총 플럭스를 최소화합니다. 이것은 다음과 같이 수학적으로 정의됩니다:
+
+  $$\text{min }\sum_iv_i$$
+
+  s.t.
+
+  $$Nv=0$$
+
+  $$v_{bio}=v_{bio,lb}$$
+
+  $$0\leq v \leq v_{max}$$
+
+pFBA의 목적은 효소 사용량을 최소화하여 생체 metabolic network의 효율성을 높이는 것입니다.
+
+따라서, 사용되는 Genes는 다음과 같이 분류될 수 있습니다.
+
+* **Essential**
+  * 생존에 필수적인 유전자로서, 해당 유전자가 없으면 세포가 생존할 수 없습니다.
+* **pFBA optima**
+  * pFBA 최적화에 기여하는 유전자로서, 특정 조건에서 최소 효소 사용량을 실현하는데 중요한 역할을 합니다.
+* **Enzymatically less efficient (ELE)**
+  * 해당 유전자의 반응은 대사 네트워크에서 필요한 기능을 수행할 수 있지만, 더 적은 단계로 이루어진 대안 경로가 존재합니다.
+* **Metabolically less efficient (MLE)**
+  *  해당 유전자의 반응은 대사 네트워크의 전반적인 효율성을 저하시킵니다. 이러한 반응은 사용되더라도 세포의 성장률을 감소시킬 수 있습니다.
+*  **No flux in the experimental condtions (pFBA no-flux)** 
+   *  험 조건에서 해당 유전자와 관련된 반응의 플럭스가 관찰되지 않는 경우입니다.
+  
+![](./pfba.PNG)
+
+### without reaction splitting
+
+reaction을 forward와 backward 두가지로 나누지 않고도 pFBA를 사용할 수 있습니다. 그러나 위의 LP를 바로 사용할 순 없습니다. 이 경우 다음 substitution이 필요합니다. 
+
+$$v_i=v_i^+-v_i^-\\
+|v_i|=v_i^++v_i^-$$
+
+s.t. 
+
+$$v_i^+,v_i^-\geq 0$$
+
+따라서, 다음과 같은 LP를 고안할 수 있습니다.
+
+  $$\text{min }\sum_i|v_i|=\text{min }\sum_iv_i^++v_i^-$$
+
+  s.t.
+
+  $$Nv=0$$
+
+  $$v_i=v_i^+-v_i^-$$
+
+  $$v_{bio}=v_{bio,lb}$$
+
+  $$v_{min}\leq v \leq v_{max}$$
+
+  $$v_i^+,v_i^-\geq 0$$
+
+이는 모든 반응의 Flux의 합이 최소가 되도록 합니다.
+
+이 최적화 문제는 최소 플럭스가 각 반응의 양의 및 음의 플럭스 중 적어도 하나가 0이면 동일한 목표 값을 가집니다. 이 경우, $v_i$는 다음과 같이 정의됩니다:
+
+- $v_i=v_i^+$ (if $v_i \geq 0$)
+- $v_i=-v_i^-$ (if $v_i \leq 0$)
+
+만약 $v_i^+$와 $v_i^-$가 모두 0이 아닌 양수이고, 그 중 더 작은 값 $\delta$라고 가정해봅시다. 이때 두 값에서 $\delta$를 빼도 $v_i=v_i^+-v_i^-$는 변하지 않습니다. 
+
+그러나, 이는 결국 objective에서 $2\delta$를 빼게 되는 것으로, 이는 최적성을 부정합니다. objective는 더 작아질 수 없기 때문에, 이는 모순입니다.
+
+따라서, 다음의 형태를 다다음과 같이 변형합니다. 
+
+> $$\text{min }\sum_i c_i|x_i|$$
+> 
+> s.t.
+> 
+> $$Ax \leq b$$
+
+다음으로 변형:
+
+$$\text{min }\sum_i c_i(x_i^++x_i^-)$$
+
+s.t.
+
+$$A(x^++x^-) \leq b$$
+
+$$x^+,x^- \geq 0$$
+
+### Minmax objective
+
+"최대 오차 최소화 추정" 문제는 선형 프로그래밍 (LP)을 사용하여 최적화됩니다. 이 문제는 최대 오차를 최소화하면서 데이터 포인트와 모델 예측 간의 최대 오차를 최소화하는 모델을 찾는 것입니다. 일반적으로 이 문제는 최대 절대 오차를 최소화하는 문제로 변환됩니다.
+
+최대 오차 최소화 추정을 다루는 일반적인 접근 방법은 다음과 같습니다:
+
+- LP Transformation: 먼저, 최대 오차 최소화 추정 문제를 선형 프로그래밍 문제로 변환합니다. 이것은 일반적으로 최대 절대 오차를 최소화하는 선형 프로그래밍 문제로 변환됩니다.
+
+- Least Maximum Deviation Estimation: 변환된 선형 프로그래밍 문제를 풀어서 최적의 모델을 찾습니다. 이 최적의 모델은 데이터 포인트와 모델 예측 간의 최대 오차를 최소화하면서 모든 데이터 포인트에 대해 최대 절대 오차를 최소화합니다.
+
+$$\text{min max }\sum_j c_{kj}x_j$$
+
+s.t.
+
+$$Ax \leq b\\
+x \geq 0$$
+
+이는 일반적인 LP의 형태와 다르니, 변형해줍니다. 이를 위해 새 decision variable z를 도입합니다.
+
+- $\sum_j c_{kj}x_j \leq z$ for every $k \in K$
+
+이를 통해 z에 대한 optimal value가 k의 최댓값보다 크지 않도록 합니다. 
+
+$$\text{min }z$$
+
+s.t.
+
+$$\sum_j c_{kj}x_j \leq z$$
+
+$$Ax \leq b\\
+x \geq 0$$
+
+아 그냥 시발 강의 10은 ppt보고 공부하자
