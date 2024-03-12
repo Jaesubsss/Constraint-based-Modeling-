@@ -56,6 +56,22 @@
     - [Quadratic programming - QP](#quadratic-programming---qp)
     - [MOMA Formulation](#moma-formulation)
   - [Regulatory on/off Minimization - ROOM](#regulatory-onoff-minimization---room)
+  - [Metabolic engineering](#metabolic-engineering)
+    - [Bilevel Programming](#bilevel-programming)
+    - [KKT conditions](#kkt-conditions)
+      - [Equality Constrained Optimization](#equality-constrained-optimization)
+      - [Why is L(x, λ) = f(x) of interest?](#why-is-lx-λ--fx-of-interest)
+      - [Equality, Inequality Constrained Optimization](#equality-inequality-constrained-optimization)
+      - [Why is L(x, λ, μ) = f(x) of interest?](#why-is-lx-λ-μ--fx-of-interest)
+      - [KKT conditions - sufficient](#kkt-conditions---sufficient)
+    - [Duality LP](#duality-lp)
+    - [OptKnock](#optknock)
+    - [OptStrain](#optstrain)
+    - [OptReg](#optreg)
+  - [parsimonious enzyme usage FBA- pFBA](#parsimonious-enzyme-usage-fba--pfba)
+    - [with reaction splitting](#with-reaction-splitting)
+    - [without reaction splitting](#without-reaction-splitting)
+    - [Minmax objective](#minmax-objective)
 
 
 ## Matrix Properties
@@ -708,7 +724,7 @@ $z$의 값을 어떻게 증가시킬 수 있을까요?
     
     > second entering variable은 $x_2$입니다. $x_2$의 coefficient로 각 right hand side의 값을 나눴을 때 얻어지는 값이 upperbound입니다. 
 - **Step VI**: Optimality를 확인합니다.
-두 번째 feasible solution도 최적이 아닙니다. 왜냐하면 목적 함수에 음의 계수가 포함되어 있기 때문입니다. 
+두 번째 feasible solution도 최적이 아닙니다. 왜냐하면 objective function에 음의 계수가 포함되어 있기 때문입니다. 
 더 많은 반복이 필요합니다. 
   > 다음 leaving variable은 최소 upperbound를 가지는 4번째 row의 basic variable인 $s_3$입니다.
 
@@ -754,11 +770,11 @@ $$5𝑥_1 + 3𝑥_2 + 2𝑥_3 - 𝑠_2 + 𝑤_2 = 11 $$
 
 $$𝑥_1 = 𝑥_2 = 𝑥_3 = 𝑠_1 = 𝑠_2 = 0, 𝑤_1 = 13, 𝑤_2 = 11 $$
 
-목적 함수는 다음과 같이 변환됩니다:
+objective function는 다음과 같이 변환됩니다:
 
 $$𝑧 = 1500𝑥_1 + 1575𝑥_2 + 420𝑥_3 + 5000𝑤_1 + 5000𝑤_2 $$
 
-𝑤1 = 𝑤2 = 0인 솔루션은 실현 가능하지만, 𝑤1 > 0, 𝑤2 > 0인 솔루션은 그렇지 않습니다. 따라서 이러한 값들을 0으로 추동시키기 위해 대규모 상수 𝑀을 목적 함수에 도입할 수 있습니다. 이는 big-M Methode으로 알려져 있습니다.
+𝑤1 = 𝑤2 = 0인 솔루션은 실현 가능하지만, 𝑤1 > 0, 𝑤2 > 0인 솔루션은 그렇지 않습니다. 따라서 이러한 값들을 0으로 추동시키기 위해 대규모 상수 𝑀을 objective function에 도입할 수 있습니다. 이는 big-M Methode으로 알려져 있습니다.
 
 | Row num | Basic variable | 𝑧 | 𝑥1 | 𝑥2 | 𝑥3 | 𝑠1 | 𝑠2 | 𝑤1 | 𝑤2 | Right-hand side | Upper bound on entering variable |
 |---------|----------------|---|-----|-----|-----|-----|-----|-----|-----|------------------|---------------------------------|
@@ -1090,7 +1106,7 @@ steady state의 가정 하에, 반응들의 농도변화 예를 살펴보도록 
 
 이는 결국 $Nv=0$의 형태입니다.
 
-그러나 일반적으로, 대사 네트워크에는 사용 가능한 물질보다 더 많은 반응이 포함되어 있습니다. 이는 본질적으로 불완전한 linear equation system을 유발하며, 무한대로 많은 solution이 있을 수 있습니다. 
+그러나 일반적으로, Metabolic network에는 사용 가능한 물질보다 더 많은 반응이 포함되어 있습니다. 이는 본질적으로 불완전한 linear equation system을 유발하며, 무한대로 많은 solution이 있을 수 있습니다. 
 
 이러한 space of solutions를 좁히는 것과 biologically relevant solution을 식별하는 것이 우리의 목적입니다.
 
@@ -1139,15 +1155,15 @@ Upper bound는 일반적으로 큰 수로 설정되거나 (예: 1000), 데이터
 이 둘을 결합하여, linear programming 문제로 표현할 수 있습니다!
 
 > **growth as the optimum $z^*$**
->$$z^*=\mathbf{max}\, \; c^Tv$$
+>$$z^*=\text{max } c^Tv$$
 >s.t.
 >$$Nv=0$$
 >$$v_{min} \leq v_j \leq v_{max}$$
 >where
 >$$c_i =
 >\begin{cases} 
-> 1,\; i \; corresponds\; to \; r_{bio} \\ 
-> 0,\; otherwise 
+> 1, i\text{ corresponds to }r_{bio} \\ 
+> 0,\text{otherwise}
 > \end{cases}
 > $$
 
@@ -1274,11 +1290,11 @@ FBA에서 alternative optima가 발생하는 경우, 이는 biological implicati
 
 FVA는 metabolic network에서 각 반응의 Flux 변동성을 평가하는 방법입니다. 이를 통해 Alternative Optima를 식별할 수 있습니다.
 
-일반적으로, 대사 네트워크의 반응은 reversible 반응과 irreversible 반응으로 구분됩니다. reversible 반응은 양방향으로 반응할 수 있으며, irreversible 반응은 한 방향으로만 반응합니다. FVA에서는 각 반응의 상한과 하한을 설정하여 해당 반응이 어떤 범위 내에서 활성화될 수 있는지를 확인합니다.
+일반적으로, Metabolic network의 반응은 reversible 반응과 irreversible 반응으로 구분됩니다. reversible 반응은 양방향으로 반응할 수 있으며, irreversible 반응은 한 방향으로만 반응합니다. FVA에서는 각 반응의 상한과 하한을 설정하여 해당 반응이 어떤 범위 내에서 활성화될 수 있는지를 확인합니다.
 
 일반적으로, 반응의 상한(upper bound)은 1000 (단위: mol/gDW/h)로 설정됩니다. 이는 반응이 특정 제약 없이 최대로 활성화될 수 있음을 나타냅니다. 반면, irreversible반응의 하한은 보통 0으로 설정됩니다. 이는 해당 반응이 역으로 진행될 수 없음을 의미합니다. reversible 반응의 하한은 -1000으로 설정됩니다. 이는 reversible 반응이 최대로 역방향으로 활성화될 수 있음을 나타냅니다.
 
-그러나 이러한 상한과 하한이 모든 경우에 도달 가능한 것은 아닙니다. 특정 상황에서는 상한과 하한이 동시에 도달할 수 없는 경우도 있습니다. 이는 특정 조건에서 대사 네트워크가 제한되어 있거나, 제약 조건이 서로 충돌하는 경우 등이 그 예시입니다.
+그러나 이러한 상한과 하한이 모든 경우에 도달 가능한 것은 아닙니다. 특정 상황에서는 상한과 하한이 동시에 도달할 수 없는 경우도 있습니다. 이는 특정 조건에서 Metabolic network가 제한되어 있거나, 제약 조건이 서로 충돌하는 경우 등이 그 예시입니다.
 
 ### Feasible Range
 
@@ -1286,9 +1302,9 @@ Feasible range는 steady state에서 도달 가능한 Range of fluxes를 의미�
 
 이를 위해 다음과 같은 LP Problem을 설계합니다:
 
-$$min \; (max) \; v_i$$
+$$\text{min (max) } v_i$$
 
-$$Nv=0,\; steady \; state$$
+$$Nv=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m$$
 
@@ -1311,9 +1327,9 @@ $$v_{i,min}=v_{i,max}=0$$
 
 Operational Range는 주어진 objective를 최적화하는 어떤 steady state에서 얻을 수 있는 flux의 range를 나타냅니다. 
 
-$$min \; (max) \; v_i$$
+$$\text{min (max) } v_i$$
 
-$$Nv=0,\; steady \; state$$
+$$Nv=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m$$
 
@@ -1349,9 +1365,9 @@ alternative optima를 enumerate하는 방법은 주어진 반응의 최소값과
 
 $v_j^{max,o}$와 $v_j^{min,o}$이 주어졌을 때, 반드시 $v_j=v_j^{max,o}$ 혹은 $v_j=v_j^{min,o}$인 flux distribution이 존재합니다. 즉, 주어진 반응 j에 대한 최소값과 최대값에 도달하는 플럭스 분포를 찾는 것이 가능합니다. 
 
-$$max \; v_i$$
+$$\text{max } v_i$$
 
-$$Nv=0,\; steady \; state$$
+$$Nv=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m,i\neq j$$
 
@@ -1442,14 +1458,14 @@ FCA는 반응 플럭스간의 상관 관계를 결정하는데 사용 될 수 �
 
   한 가지 방법은 플럭스 샘플링을 사용하여 상관 관계를 확인하는 것입니다. 그러나 이것은 비용이 많이 드는 방법일 수 있습니다. FCA를 사용하면 이러한 상관 관계를 효율적으로 식별할 수 있습니다. 여러 선형 프로그램을 풀지 않고도 상관 관계를 분석할 수 있습니다.
 
-- 대사 네트워크의 구조가 반응 플럭스 간의 종속성을 어떻게 유도하는지 지정할 수 있을까요?
+- Metabolic network의 구조가 반응 플럭스 간의 종속성을 어떻게 유도하는지 지정할 수 있을까요?
 
-  FCA를 통해 대사 네트워크의 토폴로지와 구조가 반응 플럭스 간의 상호 작용에 어떻게 영향을 미치는지 이해할 수 있습니다. 특히, 플럭스 커플링 패턴을 통해 네트워크의 모듈성, 경로 간의 상호 작용, 플럭스 제어 포인트 등을 분석할 수 있습니다.
+  FCA를 통해 Metabolic network의 토폴로지와 구조가 반응 플럭스 간의 상호 작용에 어떻게 영향을 미치는지 이해할 수 있습니다. 특히, 플럭스 커플링 패턴을 통해 네트워크의 모듈성, 경로 간의 상호 작용, 플럭스 제어 포인트 등을 분석할 수 있습니다.
 
 
 - 이러한 종속성의 생물학적 함의는 무엇인가요?
 
-  FCA를 사용하여 발견된 반응 간의 종속성은 생물학적으로 중요한 메커니즘을 나타낼 수 있습니다. 이러한 종속성은 대사 네트워크의 기능적 특성, 세포 내 에너지 및 물질 전달, 대사 제어 등을 이해하는 데 도움이 될 수 있습니다. 종속성의 해석은 대사 네트워크의 동작과 질병 상태 간의 관련성을 탐구하는 데 기여할 수 있습니다.
+  FCA를 사용하여 발견된 반응 간의 종속성은 생물학적으로 중요한 메커니즘을 나타낼 수 있습니다. 이러한 종속성은 Metabolic network의 기능적 특성, 세포 내 에너지 및 물질 전달, 대사 제어 등을 이해하는 데 도움이 될 수 있습니다. 종속성의 해석은 Metabolic network의 동작과 질병 상태 간의 관련성을 탐구하는 데 기여할 수 있습니다.
 
 
 FCA의 주요 목표는 reactions pair을 그들의 dependence에 기반하여 분류하는 것입니다. 반응 간의 dependence는 반응 커플링이라고 불립니다. 이 분류를 달성하기 위해 FBA와 유사한 수식을 사용할 것을 보일 것입니다.
@@ -1554,9 +1570,9 @@ Fluxes끼리 상관성을 보이는 반응들을 식별하기 위한 더 효율�
 
 Reaction couplings를 식별하기 위한 Computational ways에는 linear fractional program이 있습니다. 
 
-$$max(min) \; \frac{v_i}{v_j}$$
+$$\text{max(min) } \frac{v_i}{v_j}$$
 
-$$Nv=0,\; steady \; state$$
+$$Nv=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m$$
 
@@ -1583,9 +1599,9 @@ $$v_{i}^{min} \leq v_i \leq v_{i}^{max}$$
 
 따라서 다음과 같이 업데이트 됩니다.
 
-$$max(min) \; \frac{v_i}{v_j}$$
+$$\text{min(max) } \frac{v_i}{v_j}$$
 
-$$Nv=0,\; steady \; state$$
+$$Nv=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m$$
 
@@ -1593,9 +1609,9 @@ $$0 \leq v_i \leq v_{i}^{max}$$
 
 LFP를 해결하기 위해, 임의의 양수 $t$를 도입하여 분모 분자 및 모든 constraint에 곱해보겠습니다. 이를 통해 LFP를 표준 LP로 변환할 수 있습니다.
 
-$$max(min) \; \frac{v_it}{v_jt}$$
+$$\text{max(min) } \frac{v_it}{v_jt}$$
 
-$$N(vt)=0,\; steady \; state$$
+$$N(vt)=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i \leq m$$
 
@@ -1607,9 +1623,9 @@ $$t \geq 0$$
 
 따라서, $v'=vt$로 치환하면, $v'_j=1$입니다. 그렇다면 LFP의 형태는 다음과 같이 쓸 수 있습니다.
 
-$$max(min) \; v'_i$$
+$$\text{max(min) } v'_i$$
 
-$$Nv'=0,\; steady \; state$$
+$$Nv'=0,\text{ steady state}$$
 
 $$\forall i,1 \leq i\neq j \leq m$$
 
@@ -1655,7 +1671,7 @@ $$\mathbf{max}\frac{c^Tx+ \alpha}{d^Tx+\beta}=c^Ty+\alpha t$$
 
 ### Performance of mutatns
 
-FBA의 중요한 응용 중 하나는 Knock-out 변이를 시뮬레이션하는 것입니다. 유전학에서 Knock-out 변이란 유전자의 삭제 또는 비활성화로 인해 해당 유전자가 부호화하는 단백질이 없어지는 현상을 말합니다. FBA에서 Knock-out 변이를 시뮬레이션하는 것은 해당되는 반응 플럭스를 제로로 제한하여 대사 네트워크에서 해당 반응을 제거하는 것입니다.
+FBA의 중요한 응용 중 하나는 Knock-out 변이를 시뮬레이션하는 것입니다. 유전학에서 Knock-out 변이란 유전자의 삭제 또는 비활성화로 인해 해당 유전자가 부호화하는 단백질이 없어지는 현상을 말합니다. FBA에서 Knock-out 변이를 시뮬레이션하는 것은 해당되는 반응 플럭스를 제로로 제한하여 Metabolic network에서 해당 반응을 제거하는 것입니다.
 
 예를 들어, 유전자 𝑔가 특정 반응 𝑟을 촉매하는 효소를 부호화하는 경우를 생각해봅시다. 유전자 𝑔의 Knock-out을 시뮬레이션하기 위해서는 해당 반응의 플럭스(𝑣𝑟)를 제로로 설정합니다. 이렇게 하면 대사 모델에서 유전자 𝑔와 관련된 효소 활동이 제거됩니다. 그런 다음 이 제약 조건을 가지고 FBA 문제를 해결하여 Knock-out 변이의 대사 형질을 분석할 수 있습니다.
 
@@ -1744,29 +1760,29 @@ $$\mathbf{det}(Q-\lambda I)=0$$
 
 - **Interior Point Method:** 
   
-  Interior Point Method은 QP 문제를 해결하기 위해 Interior Point을 향해 이동하는 방법입니다. 이 방법은 주어진 제약 조건을 고려하면서 목적 함수를 최적화하는 접근 방법으로, global optimum solution을 찾는 데 효과적입니다.
+  Interior Point Method은 QP 문제를 해결하기 위해 Interior Point을 향해 이동하는 방법입니다. 이 방법은 주어진 제약 조건을 고려하면서 objective function를 최적화하는 접근 방법으로, global optimum solution을 찾는 데 효과적입니다.
 
 - **Active Set Method:** 
   
-  Active Set Method은 문제를 푸는 동안 Active 제약 조건을 식별하고 해당 제약 조건에 대한 최적해를 찾습니다. 이 방법은 QP 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+  Active Set Method은 문제를 푸는 동안 Active 제약 조건을 식별하고 해당 제약 조건에 대한 최적해를 찾습니다. 이 방법은 QP 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 objective function를 함께 고려합니다.
 
 - **Augmented Lagrangian Method:** 
   
-  Augmented Lagrangian Method은 제약 조건이 있는 최적화 문제를 해결하기 위한 방법 중 하나입니다. 이 방법은 라그랑주안 함수를 수정하여 추가된 제약 조건을 고려합니다. 이 방법은 주어진 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 목적 함수를 함께 고려합니다.
+  Augmented Lagrangian Method은 제약 조건이 있는 최적화 문제를 해결하기 위한 방법 중 하나입니다. 이 방법은 라그랑주안 함수를 수정하여 추가된 제약 조건을 고려합니다. 이 방법은 주어진 문제를 작은 부분 문제로 분해하여 해결하는 방법으로, 주어진 문제의 제약 조건과 objective function를 함께 고려합니다.
 
 - **Conjugate Gradient Method:** 
   
-  Conjugate Gradient Method은 QP 문제를 해결하기 위한 반복적인 최적화 방법입니다. 이 방법은 목적 함수의 기울기를 사용하여 최적화 문제를 해결하는 반복적인 접근 방법으로, 최적해를 찾기 위해 반복적으로 기울기를 수정합니다.
+  Conjugate Gradient Method은 QP 문제를 해결하기 위한 반복적인 최적화 방법입니다. 이 방법은 objective function의 기울기를 사용하여 최적화 문제를 해결하는 반복적인 접근 방법으로, 최적해를 찾기 위해 반복적으로 기울기를 수정합니다.
 
 - **Extensions to Simplex Algorithm:** 
   
-  심플렉스 알고리즘은 선형 프로그래밍 문제를 해결하는 데 사용되지만, 일부 확장은 QP 문제를 해결하는 데 사용될 수 있습니다. 이 방법은 제약 조건을 고려하면서 목적 함수를 최적화하는 방법으로, 선형 및 이차 제약 조건을 동시에 고려합니다.
+  심플렉스 알고리즘은 선형 프로그래밍 문제를 해결하는 데 사용되지만, 일부 확장은 QP 문제를 해결하는 데 사용될 수 있습니다. 이 방법은 제약 조건을 고려하면서 objective function를 최적화하는 방법으로, 선형 및 이차 제약 조건을 동시에 고려합니다.
 
 ### MOMA Formulation
 
 wild type $v$의 steady state flux distribution가 주어졌을 때, QP problem 형식의 MOMA는 다음과 같이 수학적으로 쓰일 수 있습니다.
 
-$$\mathbf{min}\;w^TI_mw-(2v^T)w$$
+$$\text{min }w^TI_mw-(2v^T)w$$
 
 s.t.
 
@@ -1852,7 +1868,784 @@ binary value $y_i$값에 따라 위의 조건은 변화합니다.
 
   $$w_i \geq v_i^l$$
 
-ROOM는 MOMA와 마찬가지로 biomass optimization를 고려하지 않습니다. MOMA는 유전자 Knock-out 후의 대사 네트워크의 최적 성장률을 찾는 데 중점을 두는 반면, ROOM은 유전자 규제의 변화를 최소화하여 대사 네트워크의 변화를 설명하는 데 중점을 둡니다.
+ROOM는 MOMA와 마찬가지로 biomass optimization를 고려하지 않습니다. MOMA는 유전자 Knock-out 후의 Metabolic network의 최적 성장률을 찾는 데 중점을 두는 반면, ROOM은 유전자 규제의 변화를 최소화하여 Metabolic network의 변화를 설명하는 데 중점을 둡니다.
 
 ROOM은 분기 지점에서 한 경로를 선택하는 경향이 있습니다. 이것은 "linearity hypothesis"이라고도 합니다. 이는 두 분기 모두를 통과하는 대신 한 분기만을 선택한다는 것을 의미합니다. 이는 ROOM이 다른 메트릭을 사용하여 플럭스를 평가하고 최소화하고 있기 때문에 발생합니다. MOMA가 주어진 조건에서 최적의 대사 상태를 찾으려고 하는 반면, ROOM은 유전자 규제의 변화를 최소화하려고 합니다.
 
+
+## Metabolic engineering
+
+1. Can one design strategy to increase product of interest based only on knock-outs?
+  - OptKnock
+2. Can one design strategy to increase product of interest by inserting non-native genes (in combination with knockouts)?
+  - OptStrain
+3. How difficult is to design a strategy that also includes overxpression targets?
+  - 존나 어려움
+
+Metabolic engineering에서 중요한 설계 원칙 중 하나는 세포의 growth을 원하는 metabolite의 생산과 결합하는 것입니다. 이 원칙은 원하는 metabolite의 production을 세포의 metabolic function의 필수 부산물로 만드는 것입니다. 따라서 이 metabolite의 production은 생물체의 대사 기능의 필수적인 부분이 됩니다. 성장은 생산을 추진하는 주요 동력이 됩니다.
+
+이 원칙은 cell growth와 production of metabolites를 서로 연관시켜 optimizing growth을 통해 metabolite의 production을 optimize함으로써 metabolic engineering 목표를 달성하려는 것입니다. 
+
+- **Weak Coupling**
+
+  Weak Coupling에서는 충분히 높은 production 수율이 최대 또는 최대에 근접한 생물량 수율에서 달성됩니다.
+  
+  다시 말해, Weak Coupling에서는 biomass production이 최대로 유지될 때, 원하는 metabolite의 production이 충분히 높은 수준에 도달합니다. 이러한 경우, organism의 growth가 production의 주요 동력이 되며, biomass production과 metabolite production 사이에는 Strong Coupling이 있습니다.
+
+- **Strong Coupling**
+
+  Strong Coupling에서는 production이 성장 없이도 반드시 발생해야 합니다.
+
+  이것은 원하는 metabolite production이 생물체의 growth와 독립적으로 발생할 수 있음을 의미합니다. 즉, production이 growth에 의해 드라이브되지 않고, production을 위한 특별한 조건이 필요합니다. Metabolic network는 원하는 metabolite production을 자동으로 유도하는 것으로 구성되어 있습니다. 예를 들어, 원하는 metabolite production은 해당 물질의 전구체 또는 중간체의 production이 완전히 급이 들어가거나 반응의 특정 경로에 따라 직접적으로 조절될 수 있습니다.
+
+
+### Bilevel Programming
+
+그렇다면, 우리가 원하는 Metabolite의 production을 최대화하기 위한 최선의 Knock-out combination 을 어떻게 하면 찾을 수 있습니까?
+
+주어진 Metabolic network에서 가능한 모든 knock-out combination을 고려하기 위해 다음과 같은 수학적 optimization problem을 고려할 수 있습니다:
+
+모든 subset $T \subseteq L$에 대해,
+
+$$\text{max } v_{chemical}$$
+
+s.t.
+
+$$Nv=0$$
+
+$$\forall j \in T, v_j=0$$
+
+$$\forall i,i \notin T$$
+
+$$v_i^{min} \leq v_i \leq v_i^{max}$$
+
+$$v_{bio} \geq \alpha z^*$$
+
+* 여기서 $v_{chemical}$은 우리가 최대화를 원하는 metabolite의 생산량입니다. 
+* $T$는 제거할 반응에 대한 subset을 의미합니다. 
+* $v_{bio}$는 biomass production입니다.
+* $z^*$는 optimal growth flux입니다.
+* $\alpha$는 strong coupling을 정의하는 파라미터입니다.
+
+따라서, 위의 질문은 다음과 같이 바뀝니다. 
+
+> 최적의 biomass production을 보장하면서 원하는 metabolite의 production을 최대화 하기 위해 knock-out이 필요한 reactions를 식별하는 방법은 무엇입니까?
+
+이는 "optimal biomass production"이라는 optimization problem이 해결되었다는 가정 하에, "optimal metabolite production"이라는 또 다른 optimization problem이 등장하는, 즉, 두개의 nested optimizations입니다. 이것을 **bilevel programming**이라 부릅니다. 
+
+knock-out이 필요한 반응을 식별하기 위해, 위의 ROOM에서 소개되었던 개념(binary variables)을 가져올 수 있습니다.
+
+* $y_i =1$이면, 해당 반응이 knock-out되지 않았음을 의미합니다.
+* $y_i=0$이면, 해당 반응이 knock-out되었음을 의미합니다. 
+
+knock-out이 되었다는 말은, 이 반응에 대한 Flux의 상한과 하한이 모두 0이 라는 말과 같습니다. 따라서, 상한과 하한을 다음과 같이 쓸 수 있습니다.
+
+$$y_iv_i^{min} \leq v_i \leq y_iv_i^{max}$$
+
+즉, $y_i=0$일 때, $v_i=0$입니다. 
+
+이러한 binary variable은 다음의 조건을 충족해야 합니다.
+
+$$\sum_{i=1}^m(1-y_i) \leq K$$
+
+이 조건을 통해 최대 knock-out reactions의 개수를 제한할 수 있습니다.
+
+따라서 optimization problem은 다음과 같이 쓰입니다:
+
+
+$$\text{max } v_{chemical}$$
+
+s.t.  $\{$
+
+$$\text{max } v_{bio}$$
+
+  s.t $\{$
+
+  $$Nv=0$$
+
+  $$\forall i, 1 \leq i \leq m$$
+
+  $$y_iv_i^{min} \leq v_i \leq y_iv_i^{max}$$
+
+  $$y_i \in \{0,1\}$$
+
+  $$\sum_{i=1}^m(1-y_i) \leq K$$
+
+  $$\}\}$$
+
+nested된 내부의 optimization problem은 FBA로 간단하게 해결할 수 있습니다. 
+
+그렇다면 이런 bilevel problem은 어떻게 해결합니까?
+
+두가지의 방식이 있습니다:
+
+* **KKT conditions**
+* **Dual problems**
+
+### KKT conditions
+
+KKT(Karush-Kuhn-Tucker) condition은 제한이 있는 optimization problem의 해를 찾기 위한 필요 조건으로, 주어진 optimization problem에 대한 최적해의 조건을 나타냅니다.
+
+주어진 문제가 다음과 같이 constraint가 없는 문제일 때:
+
+$$\text{min } f(x)$$
+
+s.t.
+
+$$x \in \mathbb{R}^n$$
+
+여기서 x는 n차원 벡터입니다. 이때, $f(x)$가 local minimizer $x^*$에서 극소값을 가질 때, $f(x)$가 $x^*$에서 연속적으로 미분 가능한 경우 다음과 같은 KKT conditions이 성립합니다:
+
+$$\nabla f(x^*)=0$$
+
+즉, $f(x)$는 $x^*$에서 stationary합니다. 이를 **Gradient**라 합니다. 
+
+여기서 $f(x^*)$는 벡터로, 다음과 같은 형태를 가집니다:
+
+$$\nabla f(x^*)=
+\begin{bmatrix}
+\frac{\partial f}{\partial x_1} \\
+\vdots \\
+\frac{\partial f}{\partial x_n}
+\end{bmatrix}
+$$
+
+하나의 변수에 대한 함수를 최적화하는 방법은 해당 함수를 미분하고 미분한 함수가 0이되는 지점을 찾는 것입니다. 이 점이 함수의 극소값 또는 극대값이 될 수 있습니다. 
+
+두 변수에 대한 함수를 최적화하는 경우에도 마찬가지입니다. 함수를 각 변수에 대해 편미분하여 편미분한 함수가 0이 되는 지점을 찾습니다.
+
+다음 예시를 통해 더 자세히 살펴보겠습니다
+
+$$\text{min } 2x_1^2+x_2^2$$
+
+s.t.
+
+$$x_1 + x_2 = 1$$
+
+problem이 constrained되지 않았다고 가정할 때,
+
+$$\frac{\partial f(x_1,x_2)}{\partial x_1}=4x_1=0$$
+
+$$\frac{\partial f(x_1,x_2)}{\partial x_2}=2x_2=0$$
+
+즉, 다음과 같은 벡터 형태입니다.
+
+$$\nabla f(x)=
+\begin{bmatrix}
+\frac{\partial f}{\partial x_1} \\
+\frac{\partial f}{\partial x_2}
+\end{bmatrix}
+=\begin{bmatrix}
+4x_1 \\
+2x_2
+\end{bmatrix}
+=\begin{bmatrix}
+0 \\
+0
+\end{bmatrix}
+$$
+
+여기서 해는 $x_1=x_2=0$이지만, 이는 실제 constraint $x_1 + x_2 = 1$를 만족하지 않습니다.
+
+이 constraint를 만족하기 위해, 식을 조금 변형합니다. 우리는 **Penalty**를 부여하는 방식으로 식을 변형할 수 있습니다.
+
+위의 optimization problem의 objective를 다음과 같이 변형할 수 있습니다.
+
+$$L(x,\lambda) = 2x_1^2+x_2^2+\lambda(1-x_1-x_2)$$
+
+이것은 problem의 **Lagrangian**으로 불리며, $\lambda$에 해당하는 값은 constraint의 항들을 모두 한변으로 이동시켜 만들어집니다.
+
+$$(x_1+x_2=1) \to (1-x_1-x_2=0)$$
+
+우리는 각 $\lambda$에 여러 다른 값, 즉 여러 다른 **penalty**를 대입함으로써 solution을 찾을 수 있습니다.
+
+* $\lambda=0$
+  * $x_1=x_2=0$, $1-x_1-x_2=1$
+* $\lambda=1$
+  * $x_1=\frac{1}{4}$, $x_2=\frac{1}{2}$, $1-x_1-x_2=\frac{1}{4}$
+* $\lambda=2$
+  * $x_1=\frac{1}{2}$, $x_2=1$, $1-x_1-x_2=-\frac{1}{2}$
+* $\lambda=\frac{4}{3}$
+  * $x_1=\frac{1}{3}$, $x_2=\frac{2}{3}$, $1-x_1-x_2=0$
+  * constraint를 만족
+
+---
+
+
+#### Equality Constrained Optimization
+
+이렇듯, 다음과 같은 equality constrained optimization 문제가 있을 때:
+
+$$\text{min } f(x)$$
+
+s.t.
+
+$$\forall,1\leq i \leq m$$
+
+$$h_i(x)=c_i$$
+
+$$x \in \mathbb{R}^n$$
+
+다음과 같이 Lagrangian을 통해 문제가 해결될 수 있습니다. 
+
+$$L(x,\lambda)=f(x)+\sum_{i=1}^m \lambda_i(c_i-h_i(x))$$
+
+위의 예시를 빌려와 설명하자면,
+
+* $f(x)=2x_1^2+x_2^2$
+* $h(x)=x_1 + x_2$
+* $c=1$
+
+또한, 다음이 성립합니다.
+
+$$\nabla_xL(x,\lambda)=\nabla_xf(x)-\sum_{i=1}^m \lambda_i\nabla_xh_i(x)$$
+
+즉, Lagrangian $\lambda_i$이 0일 때, $L$과 $\nabla_xf(x)$도 0이 되기 때문에, homogeneous한 $f(x)$를 풀 수 있습니다. 
+
+#### Why is L(x, λ) = f(x) of interest? 
+
+왜 $L(x, \lambda)$가 중요합니까?
+
+위의 최적화 문제를 해결하는 $x^*$가 있다고 해봅시다. 그렇다면 다음 두가지 경우가 가능합니다:
+
+1. $\nabla h_1(x^*), \nabla h_2(x^*), ..., \nabla h_m(x^*)$가 linear dependent인 경우, 즉,  $\sum_{i=1}^m \lambda_i \nabla h_i(x^*) = 0$를 만족하는 일부 $\lambda_i$가 존재합니다.
+2. 다음을 만족하는 $\lambda^*$가 존재합니다:
+   
+  $$\frac{\partial L(x^*, \lambda^*)}{\partial x_1} = \cdots = \frac{\partial L(x^*, \lambda^*)}{\partial x_n}  = \frac{\partial L(x^*, \lambda^*)}{\partial \lambda_1}  = \cdots = \frac{\partial L(x^*, \lambda^*)}{\partial \lambda_m} = 0$$
+
+사실 뭔소린지는 잘 모르겠습니다. 
+
+다음 예시에서 살펴봅시다. 
+
+> $$\text{min } x_1+x_2+x_3^2$$
+> s.t.
+> $$x_1=1$$
+>
+> $$x_1^2+x_2^2=1$$
+>
+> 이 녀석은 다음과 같은 라그랑지안을 가집니다:
+> 
+> $$L(x,\lambda) =x_1+x_2+x_3^2+\lambda_1(1-x_1)+\lambda_2(1-x_1^2-x_2^2)$$
+> 
+> 이 라그랑지안이 $x_1=1$, $x_2=x_3=0$에서 optimum을 가질 때, 
+> 
+> $$\frac{\partial L(x^*, \lambda^*)}{\partial x_2}=1$$
+> 
+> 또,
+> 
+> $$\nabla h_1(x^*)=
+> \begin{bmatrix}
+> 1&0&0
+> \end{bmatrix}
+> $$
+> 
+> $$\nabla h_2(x^*)=
+> \begin{bmatrix}
+> 2&0&0
+> \end{bmatrix}
+> $$
+
+다른 것도 볼까요?
+
+> $$\text{min } 2x_1^2+x_2^2$$
+> 
+> s.t.
+> 
+> $$x_1 + x_2 = 1$$
+> 
+> $$L(x,\lambda) = 2x_1^2+x_2^2+\lambda(1-x_1-x_2)$$
+> 
+> 이 라그랑지안은 다음에서 optimum을 가집니다:
+> 
+> $$\frac{\partial L(x^*, \lambda^*)}{\partial x_1}=4x_1^*-\lambda^*=0$$
+> 
+> $$\frac{\partial L(x^*, \lambda^*)}{\partial x_2}=2x_2^*-\lambda^*=0$$
+> 
+> $$\frac{\partial L(x^*, \lambda^*)}{\partial \lambda^*}=1-x_1^*-x_2^*=0$$
+> 
+> 이는 다음의 해를 도출합니다:
+> 
+> $$x_1^*=\frac{1}{3}, x_2^*=\frac{2}{3}, \lambda^*=\frac{4}{3}$$
+
+이해가 되시나용? 아니용! ㅎㅎ 
+
+그래프에서 보면 다음과 같습니다.
+
+![](./lagran.PNG)
+
+에휴시발
+
+---
+
+#### Equality, Inequality Constrained Optimization
+
+암튼, equality, inequality constraint를 모두 가지는 optimization의 경우:
+
+$$\text{min } f(x)$$
+
+s.t.
+
+$$\forall i,1\leq i \leq m$$
+
+$$h_i(x)=c_i$$
+
+$$\forall i,1\leq i \leq l$$
+
+$$g_i(x)\leq b_i$$
+
+$$x \in \mathbb{R}^n$$
+
+해당 문제에서 feasible solution $x_0$이 주어졌을 때, binding constraint는 다음을 만족합니다:
+
+$$g_i(x)- b_i=0$$
+
+이는 optimum에서, 몇 constraints는 binding된다는 것을 의미합니다.
+
+여기서 Lagrangian은 다음과 같습니다:
+
+$$L(x, \lambda, \mu) = f(x) + \sum_{i=1}^{m} \lambda_i (c_i - h_i(x)) + \sum_{i=1}^{l} \mu_i (b_i - g_i(x))$$
+
+#### Why is L(x, λ, μ) = f(x) of interest?
+
+$L(x, \lambda, \mu)$가 중요한 이유는 다음과 같습니다.
+
+위의 optimization problem을 해결하는 $x^*$가 있다고 가정해 봅시다. 그럼 다음의 두 가지 경우가 가능합니다:
+
+1. $\nabla h_1(x^*), \nabla h_2(x^*), ..., \nabla h_m(x^*), \nabla g_1(x^*), ... , \nabla g_l(x^*)$가 linear dependent인 경우
+  
+     * 즉, 다음을 만족하는 만족하는 일부 $\lambda_i$와 $\mu_i$가 존재하는 경우
+ 
+  $$\sum_{i=1}^{m} \lambda_i \nabla h_i(x^*) + \sum_{i=1}^{l} \mu_i \nabla g_i(x^*) = 0$$
+
+2. 다음을 만족하는 $\lambda^*$와 $\mu^*$가 존재하는 경우:
+  $$\nabla f(x^*) -\sum_{i=1}^{m} \lambda^*_i \nabla h_i(x^*) -\sum_{i=1}^{l} \mu^*_i \nabla g_i(x^*) = 0$$
+
+  $$\mu^*_i g_i(x^*) = 0$$
+
+  $$\mu^*_i \geq 0$$
+
+
+여기서, feasible point $x_0$에 대해 다음과 같은 조건이 만족됩니다:
+
+$$\nabla f(x_0) - \sum_{i=1}^{m} \lambda_i \nabla h_i(x_0) - \sum_{i=1}^{l} \mu_i \nabla g_i(x_0) = 0$$
+
+$$\mu_i g_i(x_0) = 0$$
+
+$$\mu_i \geq 0$$
+
+
+여기서 $\mu_i g_i(x_0) = 0$ 조건은 complementary slackness이라고 합니다. 만약 $n$개의 complementary slackness가 있다면, 해결해야 할 가능한 시스템은 $2^n$개가 됩니다.
+
+KKT 조건은 Optimum point에 대한 necessary conditions(필요 조건)입니다!
+
+두개의 예시를 보겠습니다:
+
+> $$\text{maximize } x$$
+> 
+> s.t.
+> 
+> $$-1 - x^3 + y \leq 0$$
+> 
+> $$-y \leq 0$$
+> 
+> 라그랑지안 함수는 다음과 같습니다:
+> 
+> $$L(x, y, \lambda, \mu) = x + \mu_1 ((1 - x)^3 - y) + \mu_2(y)$$
+> 
+> global optimum $(x, y) = (1,0)$에서, gradients는 다음과 같습니다:
+> 
+> $$\nabla f(x, y) = \left( \frac{\partial f(x,y)}{\partial x}, \frac{\partial f(x,y)}{\partial y} \right) = (1, 0)$$
+> 
+> $$\nabla g_1(x, y) = (3(1-x)^2, 1) = (0, 1)$$
+> 
+> $$\nabla g_2(x, y) = (0, -1)$$
+> 
+> 어떤 $\mu$ 도 다음을 만족하지 않습니다:
+> 
+> $$\nabla f(x_0) - \sum_{i=1}^{2} \mu_i \nabla g_i(x_0) = 0$$
+> 
+> 즉, 위의 첫 번째 경우가 성립합니다!
+
+하이고씨팔 두번째를 봅시다잉
+
+> $$\text{max } -(x - 2)^2 - 2(y-1)^2$$
+> 
+> s.t.
+> 
+> $$x + 4y \leq 3$$
+> 
+> $$-x + y \leq 0$$
+> 
+> 라그랑지안 함수는 다음과 같습니다:
+> 
+> $$L(x, y, \lambda, \mu) = -(x - 2)^2 - 2(y-1)^2 + \mu_1(3 - x - 4y) + \mu_2(x - y)$$
+> 
+> KKT conditions는 다음과 같습니다:
+> 
+> $$\frac{\partial L}{\partial x} = -2(x - 2) - \mu_1 + \mu_2 = 0$$
+> 
+> $$\frac{\partial L}{\partial y} = -2(y - 1) - 4\mu_1 - \mu_2 = 0$$
+> 
+> $$\mu_1 (3 - x - 4y) = 0 \\
+> \mu_2 (x - y) = 0 \\
+> \mu_1, \mu_2 \geq 0$$
+> 
+> 두 complementary conditions, $\mu_1 (3 - x - 4y) = 0$와 $\mu_2 (x - y) = 0$으로부터 네 가지 cases가 나타납니다:
+> 
+> 1. $\mu_1 = 0$, $\mu_2 = 0$
+> 2. $\mu_1 = 0$, $x - y = 0$
+> 3. $3 - x - 4y = 0$, $\mu_2 = 0$
+> 4. $x - y = 0$, $3 - x - 4y = 0$
+> 
+> 이 네가지 방정식을 사용하여 네 가지 solution subset을 얻을 수 있습니다.
+> 
+> 그중 function을 minimize하는 해는:
+> 
+> $x^* = \frac{5}{3}$, $y^* = \frac{1}{3}$, 그리고 $f(x^*, y^*) = -\frac{4}{9}$
+
+ㄱ..그만..
+
+#### KKT conditions - sufficient
+
+KKT condition이 optimality를 보장하는 경우는 언제인가요?
+
+추가 조건은 KKT condition이 최적성을 보장할 수 있도록 할 수 있습니다. 이는 inequalities만 고려될 때 해당합니다.
+
+따라서 함수 $g_i(x)$가 볼록(convex)해야 합니다.
+
+만약 equlities도 고려된다면, KKT conditions는 그 자체로 optimality를 보장하는데 충분조건이 됩니다. 이때에는 대응하는 함수 $h_i(x)$가 linear해야 합니다.
+
+### Duality LP
+
+LP의 duality는 LP문제와 이와 관련된 Dual problem 간의 특별한 관계를 나타냅니다. 일반적으로 LP문제의 Duality는 **Primal problem**과 **Dual problem**간의 관계로 설명됩니다. 
+
+Primal problem은 LP 문제의 원래 형태로, 주어진 objective function를 최대화하거나 최소화하면서 주어진 제약 조건 하에서 변수를 결정하는 것입니다. 이를 일반적으로 다음과 같이 표현할 수 있습니다:
+
+$$\text{max }c^Tx$$
+
+s.t.
+
+$$Ax \leq b \\
+x \geq 0$$
+
+이 primal problem의 lagrangian은 다음의 형태를 가집니다.
+
+$$L(x,\mu)=c^Tx+\mu(b-Ax)$$
+
+이를 다음과 같이 바꿔쓸 수 있습니다.
+
+$$L(x,\mu)=\mu b+(x^T-\mu A)x$$
+
+이 primal problem은 다음과 같은 dual problem을 가집니다.
+
+$$\text{min }\lambda b$$
+
+s.t.
+
+$$\lambda A \geq c^T \\
+\lambda \geq 0$$
+
+이 Primal problem과 Dual problem사이엔 Duality가 존재합니다. 이는 다음과 같은 성질을 가집니다.
+
+* **Optimality Property:**
+
+  주어진 primal과 dual은 다음과 같은 관계를 가집니다.
+
+  $$c^Tx=\lambda b$$
+
+  즉, **primal의 optimum과 dual의 optimum은 서로 같습니다.** 
+
+* **Unboundedness Property:**
+
+  **만약 두 문제중 하나가 unbounded이면, 다른 하나는 infeasible합니다.** 즉, primal이나 dual중 하나가 무한대로 발산하면, 즉 경계가 없다면, 다른 문제는 해를 갖지 않습니다.
+
+* **Strong Duality Property:**
+
+  만약 primal LP의 Optimum이 존재하면, Dual problem의 Optimum또한 존재합니다. 이는 위의 Optimality Property와 기본적으로 같습니다. 
+
+  $$\text{max }c^Tx=\text{min }\lambda b$$
+
+---
+
+위에서 주어진 primal problem에 대해, $(c^T-\lambda A)x=0$는 dual의 **complementary slackness condition**입니다. 
+
+이는 primal problem의 decision variable x와 dual problem의 lagrangian $\lambda$ 사이의 조건입니다. 
+
+이것은 모든 decision variable x와 그에 상응하는 lagrangian λ에 대해 해당 변수에 대한 slack variable가 0이거나 decision variable가 0임을 의미합니다. 즉, 어떤 해 x에 대해, $c^T-\lambda A=0$이거나 $x=0$입니다. 
+
+이것은 primal problem에서, decision variable을 증가시킬 때, 이에 상응하는 dual variable이 얼마나 증가해야 하는지를 결정하는 조건입니다. 
+
+따라서, $\lambda_i>0$이면 해당 resource가 완전히 사용된것을 나타내며, $\lambda_i=0$이면 해당 resource가 완전히 사용되지 않았음을 의미합니다. 
+
+Dual variable $\lambda$는 **shadow prices**라고도 불립니다. 이들은 primal problem의 constraints를 하나씩 완화(relax)했을 때 objective function 값이 얼마나 변하는지를 나타내는데 사용될 수 있습니다. 따라서, shadow price는 각 constraints에 대한 "가용성"을 나타냅니다.
+
+각 constraint에 해당하는 shadow price는 해당 constraint를  relax할 때 objective function 값이 얼마나 증가하거나 감소하는지를 나타냅니다.
+
+따라서, shadow price는 해당 constraint의 중요성을 나타내며, 해당 자원의 한 단위의 가격이나 가치로 해석될 수 있습니다. 각 constraint는 shadow price를 가집니다. 
+
+### OptKnock
+
+다음과 같은 Bilevel Program이 주어졌을 때,
+
+$$\text{max } v_{chemical}$$
+
+s.t.  $\{$
+
+$$\text{max } v_{bio}$$
+
+s.t $\{$
+
+  $$Nv=0$$
+
+  $$\forall i, 1 \leq i \leq m$$
+
+  $$y_iv_i^{min} \leq v_i \leq y_iv_i^{max}$$
+
+  $$y_i \in \{0,1\}$$
+
+  $$\sum_{i=1}^m(1-y_i) \leq K$$
+
+  $$\}\}$$
+
+OptKnock은 위 문제에서 Duality of LP와 KKT conditions를 고려하여 구성될 수 있습니다. 이에 대해 두가지 방법이 있습니다. 
+
+* 내부 LP의 Dual problem을 구성하고, weak optimality condition을 적용합니다.
+* 내부 LP에 대한 KKT condition을 구성합니다.
+
+이 중 OptKnock은 위 방법을 이용하여 구성됩니다.
+
+![](./optknock.PNG)
+
+### OptStrain
+
+우리는 Knock-out을 이용해 production을 increase 하는 방법을 알아보았습니다. 이제, knock-out에 추가적으로 **non-native gene을 삽입함으로써 production을 증가**시킬 수 있는 방법에 대해 알아봅시다.
+
+OptStrain은 OptKnock에 대한 확장기능으로써, non-native gene을 insertion할 수 있는 방법입니다. 
+
+다음 네 가지 스텝을 통해 이루어질 수 있습니다.
+
+1. Creation of a universal database of metabolic reactions
+   
+   * 먼저, 모든 대사 반응에 대한 유니버셜 데이터베이스를 생성합니다. 이 데이터베이스는 대사 네트워크에서 가능한 모든 반응을 포함하고 있습니다.
+   * 이 데이터베이스는 주로 KEGG를 기반으로 합니다. KEGG는 대사 경로 및 생물학적 기능과 관련된 다양한 생물학적 정보를 포함하는 대표적인 데이터베이스입니다. 여기서 정보를 추출합니다.
+   * 반복 단위 또는 unspecified alkyl groups가 있는 R을 제거합니다. 일부 화합물은 반복 단위 또는 알킬기(R)와 같은 unspecified 기능을 가지고 있을 수 있습니다. 이러한 화합물은 데이터베이스에서 제거될 수 있습니다.
+   *  화합물 간의 반응이 균형을 이루지 않는 경우, 이러한 반응은 불균형한 것으로 간주되고 제거됩니다. 이는 대사 네트워크의 정확성을 유지하기 위해 수행됩니다.
+2. Maximum theoretical yield calculation for a product given a substrate origin
+
+   * 주어진 substrate origin에 대한 최대 이론적 수율을 계산합니다. 여기선 origin(native or non-native)나 사용된 반응의 개수에 대해선 고려하지 않습니다.
+   * 대상 metabolite의 생산 및 소비 반응의 합을 최대화합니다. 
+   ![](./step2.PNG)
+
+3. Identification of stoichiometrically balanced pathway(s) that minimizes the number of non-native functionalities
+
+   * non-native functionalities의 개수를 최소화하는 stoichiometrically balanced pathway를 찾습니다. 
+  ![](./step3.PNG)
+   * maximal production과 minimal non-native functionalities의 최적성 기준을 모두 보장하면서 alternative solution을 식별하는 방법은 다음과 같습니다:
+     * MILP 문제를 반복적으로 해결하고, 추가 constraint를 포함하여 해답을 찾습니다. 이를 **integer cut**이라 합니다.
+    
+     $$y_1+y_2+y_3\leq 2$$
+
+      이는 이미 선택된 모든 세개의 반응이 다시 함께 식별되지 않도록 합니다. 즉, 다른 alternative solution을 찾아냅니다.
+
+
+4. Incorporation of the non-native biotransformation into the production host and further optimization
+ 
+  * non-native biotransformation을 수행하기 위해 host의 metabolic network에 reactions를 포함시킵니다. stoichiometric matrix를 확장시킵니다.
+  * product of interest와 growth를 커플링(결합)합니다. 이는 host의 metabolic network에서 생산 반응의 흐름을 최대화하면서 성장을 최대화하거나 최소화하는 것을 의미합니다. 
+
+OptStrain의 적용 사례를 봅시다.
+
+
+> E. coli를 호스트로 사용하기로 결정했습니다. 이를 위해 KEGG 데이터베이스를 Methylobacterium extroquens AM1의 반응과 결합하여 대사 네트워크의 범용 데이터베이스를 생성했습니다. 이 데이터베이스에는 탄소, 산소, 수소, 질소, 황, 인으로 균형 조정된 약 3000개의 반응이 포함되어 있습니다.
+> 
+> 다양한 하부원료 선택이 가능하며, 이에는 펜토스 및 헥소스 설탕과 같은 당류뿐만 아니라 아세테이트, 라크타트, 말산, 글리세롤, 피루베이트, 성취산, 메탄올 등이 포함됩니다.
+> 
+> 제 2단계에서는 수소 생산량을 최대화하려고 합니다. 이는 메탄올을 사용하여 달성되며, 이는 수소 대 탄소 원자의 비율이 가장 높기 때문입니다. 메탄올을 소비하는 경우, 0.126 g의 수소를 달성할 수 있습니다. 단위당 수소 생산량은 메탄올 소비량당 수소 생산량을 의미합니다.
+> 
+> Methylobacterium extorquens AM1은 메탄올을 탄소 및 에너지원으로 사용하여 생존할 수 있는 선택적 메틸로트로프(facultative methylotroph)입니다. 이러한 유형의 미생물은 탄소원으로 메탄올을 사용할 수 있지만, 다른 탄소원도 사용할 수 있습니다.
+> 
+> 수소 생산을 가능하게 하는 비기질 반응이 필요한데, 이는 이 미생물이 메틸로트로프로서 일반적으로 수행하지 않는 화학 반응입니다. 이 반응은 일반적으로 수소를 생성하는 수소화효소(hydrogenase)에 의해 수행됩니다. 이는 프로톤을 수소로 환원시키는 반응을 포함합니다.
+> 
+> 또 다른 비기질 반응은 N5, N10-메테닐테트라하이드로메탄오프테린 수소효소(N5,N10-methenyltetrahydromethanopterin hydrogenase)에 의해 수행됩니다. 이 반응은 테트라하이드로메탄오프테린을 테트라하이드로메탄오프로틴과 수소로 전환하는 반응입니다.
+> 
+> 이러한 비기질 반응이 필요한 이유는 메틸로트로프가 일반적으로 수행하지 않는 화학 반응이기 때문입니다. 이러한 유형의 미생물로부터 수소를 생산하는 것은 이전에 어려웠으며, 이러한 비기질 반응을 도입함으로써 새로운 기회가 제공됩니다.
+
+---
+
+### OptReg
+
+OptReg은 또한 OptKnock의 또 다른 확장입니다. OptReg에서는 Knock-out뿐만 아니라, down- or up-regulated되어야 하는 biochemical reactions를 식별합니다. 이를 통해 최적화를 위한 조금 더 정교한 metabolic engineering strategie를 달성합니다.
+
+이 방법은 플럭스가 주어진 안정 상태 플럭스보다 충분히 작거나 크다면 down/up-regulated된 것으로 간주합니다. 이것은 regulation strength parameter인 𝐶로 알려진 파라미터를 고려함으로써 달성됩니다.
+
+이 parameter는 반응이 변경되기 위해 극복해야 하는 임계값을 정량화합니다. 이 파라미터는 0과 1 사이의 값을 가질 수 있습니다. 𝐶의 값이 높을수록 반응이 조절되기 위해 요구되는 조건이 강화됩니다.
+
+$v_{j,L}^0$와 $v_{j,U}^0$는 steady state에서 허용되는 flux를 나타냅니다. 이는 FVA를 통해 얻어질 수 있습니다. 또한 여기서 모든 반응은 irreversible하다고 가정합니다.
+
+* 주어진 Flux가 steady state Flux보다 충분히 작으면, down regulated reaction으로 간주됩니다. 따라서 flux의 range는 다음과 같습니다:
+
+  $$v_j^{min}\leq v_j \leq v^0_{j,L}(1-C)+v_j^{min}C$$
+
+* 주어진 Flux가 steady state Flux보다 충분히 크면, up regulated reaction으로 간주됩니다. 따라서 flux의 range는 다음과 같습니다:
+
+  $$v^0_{j,U}(1-C)+v_j^{max}C \leq v_j \leq v_j^{max}$$
+
+up regulation, down regulation, 그리고 knock-out을 판별하기 위해 총 3개의 binary variables가 필요합니다.
+
+$$y_j^k=0 \text{, for knocked-out}\\
+y_j^d=0 \text{, for downregulated} \\
+y_j^u=0 \text{, for upregulated}$$
+
+또한, 한 반응은 동시에 업-다운 조절되거나 녹아웃될 수 없습니다.
+
+$$(1-y_j^k)+(1-y_j^d)+(1-y_j^u)\leq 1$$
+
+또 전체 조절의 총량을 제한할 수 있습니다.
+
+$$\sum_j(1-y_j^k)(1-y_j^d)(1-y_j^u)\leq L$$
+
+또한 한 반응이 reversible하다고 할 때, 순방향과 역방향이 모두 같은방향으로 regulated될 수 없습니다.
+
+$$y_{j,f}^d+y_{j,b}^d \geq 1\\
+y_{j,f}^u+y_{j,b}^u \geq 1$$
+
+![](./optreg.PNG)
+
+## parsimonious enzyme usage FBA- pFBA
+
+### with reaction splitting
+
+우리는 대사 네트워크를 모델링할 때 세포 또는 생물학적 시스템이 목적을 최적화한다고 가정합니다. 그러나 이러한 모델링 단계는 계산 가능한 수학적 프로그래밍 접근 방식을 필요로 합니다. 이를 위해서는 계산상 효율적인 방법이 필요합니다.
+
+예를 들어, Flux Coupling Analysis는 선형 분수 프로그램에 기반한 방법입니다. 그러나 선형 분수 프로그램은 일반적으로 계산상 매우 복잡하고 비싸기 때문에, 좀 더 효율적인 계산을 위해 LP(선형 프로그래밍)으로 변환해야 합니다.
+
+이러한 변환 기법 중 하나로 Chalmers-Cooper 변환을 사용할 수 있습니다. 이 변환은 선형 분수 프로그램을 선형 프로그래밍으로 변환하는 방법 중 하나입니다. 이를 통해 계산상 효율적인 방식으로 Flux Coupling Analysis를 수행할 수 있습니다.
+
+pFBA (parsimonious enzyme usage FBA)는 효율적인 대사 토폴로지를 결정하는 데 기여할 수 있는 유전자 및 단백질의 하위 집합을 결정하는 것을 목표로 합니다. 진화 생물학적으로, 효소를 만드는데 일반적으로 비용이 발생하고, 효소를 유지 및 합성을 실행하는 사이클에서 또한 비용이 발생하기 때문입니다. 때문에 **pFBA에서는 추가적으로 Flux 자체를 최소화** 합니다. 이를 위해 대사 네트워크에서 모든 가역 반응이 두 개의 가역 반응으로 분리됩니다.
+
+이는 두가지 스텝으로 이루어집니다.
+
+1. Optimal biomass 결정을 위한 FBA:
+
+  먼저 FBA를 풀어서 최적의 생체량을 결정합니다. FBA는 대사 네트워크에서 흐르는 대사 흐름을 최적화하여 특정 조건에서의 최대 세포 성장률을 예측합니다.
+
+2. 총 Flux 최소화:
+
+  이후, 전체 대사 네트워크에서 흐르는 총 플럭스를 최소화합니다. 이것은 다음과 같이 수학적으로 정의됩니다:
+
+  $$\text{min }\sum_iv_i$$
+
+  s.t.
+
+  $$Nv=0$$
+
+  $$v_{bio}=v_{bio,lb}$$
+
+  $$0\leq v \leq v_{max}$$
+
+pFBA의 목적은 효소 사용량을 최소화하여 생체 metabolic network의 효율성을 높이는 것입니다.
+
+따라서, 사용되는 Genes는 다음과 같이 분류될 수 있습니다.
+
+* **Essential**
+  * 생존에 필수적인 유전자로서, 해당 유전자가 없으면 세포가 생존할 수 없습니다.
+* **pFBA optima**
+  * pFBA 최적화에 기여하는 유전자로서, 특정 조건에서 최소 효소 사용량을 실현하는데 중요한 역할을 합니다.
+* **Enzymatically less efficient (ELE)**
+  * 해당 유전자의 반응은 대사 네트워크에서 필요한 기능을 수행할 수 있지만, 더 적은 단계로 이루어진 대안 경로가 존재합니다.
+* **Metabolically less efficient (MLE)**
+  *  해당 유전자의 반응은 대사 네트워크의 전반적인 효율성을 저하시킵니다. 이러한 반응은 사용되더라도 세포의 성장률을 감소시킬 수 있습니다.
+*  **No flux in the experimental condtions (pFBA no-flux)** 
+   *  험 조건에서 해당 유전자와 관련된 반응의 플럭스가 관찰되지 않는 경우입니다.
+  
+![](./pfba.PNG)
+
+### without reaction splitting
+
+reaction을 forward와 backward 두가지로 나누지 않고도 pFBA를 사용할 수 있습니다. 그러나 위의 LP를 바로 사용할 순 없습니다. 이 경우 다음 substitution이 필요합니다. 
+
+$$v_i=v_i^+-v_i^-\\
+|v_i|=v_i^++v_i^-$$
+
+s.t. 
+
+$$v_i^+,v_i^-\geq 0$$
+
+따라서, 다음과 같은 LP를 고안할 수 있습니다.
+
+  $$\text{min }\sum_i|v_i|=\text{min }\sum_iv_i^++v_i^-$$
+
+  s.t.
+
+  $$Nv=0$$
+
+  $$v_i=v_i^+-v_i^-$$
+
+  $$v_{bio}=v_{bio,lb}$$
+
+  $$v_{min}\leq v \leq v_{max}$$
+
+  $$v_i^+,v_i^-\geq 0$$
+
+이는 모든 반응의 Flux의 합이 최소가 되도록 합니다.
+
+이 최적화 문제는 최소 플럭스가 각 반응의 양의 및 음의 플럭스 중 적어도 하나가 0이면 동일한 목표 값을 가집니다. 이 경우, $v_i$는 다음과 같이 정의됩니다:
+
+- $v_i=v_i^+$ (if $v_i \geq 0$)
+- $v_i=-v_i^-$ (if $v_i \leq 0$)
+
+만약 $v_i^+$와 $v_i^-$가 모두 0이 아닌 양수이고, 그 중 더 작은 값 $\delta$라고 가정해봅시다. 이때 두 값에서 $\delta$를 빼도 $v_i=v_i^+-v_i^-$는 변하지 않습니다. 
+
+그러나, 이는 결국 objective에서 $2\delta$를 빼게 되는 것으로, 이는 최적성을 부정합니다. objective는 더 작아질 수 없기 때문에, 이는 모순입니다.
+
+따라서, 다음의 형태를 다다음과 같이 변형합니다. 
+
+> $$\text{min }\sum_i c_i|x_i|$$
+> 
+> s.t.
+> 
+> $$Ax \leq b$$
+
+다음으로 변형:
+
+$$\text{min }\sum_i c_i(x_i^++x_i^-)$$
+
+s.t.
+
+$$A(x^++x^-) \leq b$$
+
+$$x^+,x^- \geq 0$$
+
+### Minmax objective
+
+"최대 오차 최소화 추정" 문제는 선형 프로그래밍 (LP)을 사용하여 최적화됩니다. 이 문제는 최대 오차를 최소화하면서 데이터 포인트와 모델 예측 간의 최대 오차를 최소화하는 모델을 찾는 것입니다. 일반적으로 이 문제는 최대 절대 오차를 최소화하는 문제로 변환됩니다.
+
+최대 오차 최소화 추정을 다루는 일반적인 접근 방법은 다음과 같습니다:
+
+- LP Transformation: 먼저, 최대 오차 최소화 추정 문제를 선형 프로그래밍 문제로 변환합니다. 이것은 일반적으로 최대 절대 오차를 최소화하는 선형 프로그래밍 문제로 변환됩니다.
+
+- Least Maximum Deviation Estimation: 변환된 선형 프로그래밍 문제를 풀어서 최적의 모델을 찾습니다. 이 최적의 모델은 데이터 포인트와 모델 예측 간의 최대 오차를 최소화하면서 모든 데이터 포인트에 대해 최대 절대 오차를 최소화합니다.
+
+$$\text{min max }\sum_j c_{kj}x_j$$
+
+s.t.
+
+$$Ax \leq b\\
+x \geq 0$$
+
+이는 일반적인 LP의 형태와 다르니, 변형해줍니다. 이를 위해 새 decision variable z를 도입합니다.
+
+- $\sum_j c_{kj}x_j \leq z$ for every $k \in K$
+
+이를 통해 z에 대한 optimal value가 k의 최댓값보다 크지 않도록 합니다. 
+
+$$\text{min }z$$
+
+s.t.
+
+$$\sum_j c_{kj}x_j \leq z$$
+
+$$Ax \leq b\\
+x \geq 0$$
+
+아 그냥 시발 강의 10은 ppt보고 공부하자
